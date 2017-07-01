@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> Gossip Protocal · ioFun</title><meta name="description" content="Gossip Protocal - wangke"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://iofun.net/atom.xml" title="ioFun"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/wangke1020" target="_blank" class="nav-list-link">GITHUB</a></li></ul></header><section class="container"><div class="post"><article class="post-block"><h1 class="post-title">Gossip Protocal</h1><div class="post-info">2016年10月26日</div><div class="post-content"><h4 id="什么是Gossip协议"><a href="#什么是Gossip协议" class="headerlink" title="什么是Gossip协议"></a>什么是Gossip协议</h4><p>Gossip Protocol利用一种随机的方式将信息散播到整个网络中。正如Gossip本身的含义一样，Gossip协议的工作流程即类似于绯闻的传播，或者流行病的传播。</p>
+<h4 id="Epidemiology"><a href="#Epidemiology" class="headerlink" title="Epidemiology"></a>Epidemiology</h4><p>流行病传染最基本的模型仅作如下几个假设：</p>
+<ol>
+<li>(n+1)个人均匀的分布在一起</li>
+<li>每一对人群之间的传染概率是$\beta$，显然$0&lt;\beta&lt;1$.</li>
+<li>任意时刻，某个人要么处于infected的状态要么处于uninfected的状态.</li>
+<li>一旦某个人从uninfected状态转变成为infected状态，其一直停留在infected状态。</li>
+</ol>
+<p>有了以上假设，我们可以进一步分析流行病的传染情况。我们记t时刻处于infected状态的人数为$y_t$，处于uninfected状态的人为$x_t$，那么初始状态 $y_0=1$, $x_0=n$，并且在任何时候$x_t+y_t=n+1$.</p>
+<p>考虑连续的时间，可知：</p>
+<blockquote>
+<p>$\frac{dx}{dt}=−βxy$</p>
+</blockquote>
+<p>解为：</p>
+<blockquote>
+<p>$x=\frac{n(n+1)}{n+e^{β(n+1)t}}$<br>$y=\frac{n+1}{1+ne^{−β(n+1)t}}$</p>
+</blockquote>
+<p>明显，当$t→∞$时，$x→0,y→(n+1)x→0,y→(n+1)$，即经过足够的时间，所有的人都将被传染。</p>
+<p>如果每个人每次传染的人数是b,那么</p>
+<blockquote>
+<p>$\beta=\frac{b}{n}$</p>
+</blockquote>
+<p>令 t=$clog(n)$,可以得到 $y\approx(n+1)-\frac{1}{n^{cb-2}}$</p>
+<p>这表明，仅需要$O(log(n))$个回合，gossip协议即可将信息传递到所有的节点。 根据分析可得，Gossip协议具有以下的特点:</p>
+<ol>
+<li>低延迟。仅仅需要$O(log(n))$个回合的传递时间。</li>
+<li>非常可靠。仅有$\frac{1}{n^{cb-2}}$个节点不会收到信息。</li>
+<li>轻量级。每个节点传送了$cblog(n)$次信息。</li>
+</ol>
+<p>于此同时，Gossip协议的容错性比较高，例如，50的丢包率等价于使用b/2b带代替b进行分析；50的节点错误等价于使用n/2来代替nn，同时使用b/2来代替b进行分析，其分析结果不用带来数量级上的变化。</p>
+<h4 id="Gossip节点的通信方式"><a href="#Gossip节点的通信方式" class="headerlink" title="Gossip节点的通信方式"></a>Gossip节点的通信方式</h4><p>根据原论文，两个节点（A、B）之间存在三种通信方式:</p>
+<ul>
+<li>push: A节点将数据(key,value,version)及对应的版本号推送给B节点，B节点更新A中比自己新的数据</li>
+<li>pull：A仅将数据key,version推送给B，B将本地比A新的数据（Key,value,version）推送给A，A更新本地</li>
+<li>push/pull：与pull类似，只是多了一步，A再将本地比B新的数据推送给B，B更新本地</li>
+</ul>
+<p>如果把两个节点数据同步一次定义为一个周期，则在一个周期内，push需通信1次，pull需2次，push/pull则需3次，从效果上来讲，push/pull最好，理论上一个周期内可以使两个节点完全一致。直观上也感觉，push/pull的收敛速度是最快的。</p>
+<p>假设每个节点通信周期都能选择（感染）一个新节点，则Gossip算法退化为一个二分查找过程，每个周期构成一个平衡二叉树，收敛速度为$O(n^2)$，对应的时间开销则为$O(log(n))$。这也是Gossip理论上最优的收敛速度。但在实际情况中最优收敛速度是很难达到的，假设某个节点在第$i$个周期被感染的概率为$P_i$ ,第$i+1$个周期被感染的概率为$P^{i+1}$ ，则pull的方式:</p>
+<blockquote>
+<p>$P_{i+1}=P_i^{b+1}$</p>
+</blockquote>
+<p>而push为：</p>
+<blockquote>
+<p>$P_{i+1}=P_i(1-\frac{1}{n})^{n(1-P_i)}$</p>
+</blockquote>
+<p>显然pull的收敛速度大于push，而每个节点在每个周期被感染的概率都是固定的p(0&lt;p&lt;1)，因此Gossip算法是基于p的平方收敛，也成为概率收敛，这在众多的一致性算法中是非常独特的。</p>
+<a id="more"></a>
+</div></article></div></section><footer><div class="paginator"><a href="/2017/06/09/CAP理论/" class="prev">PREV</a><a href="/2016/09/19/fork-and-pipe/" class="next">NEXT</a></div><div class="copyright"><p>© 2015 - 2017 <a href="http://iofun.net">wangke</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-MML-AM_CHTML"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>

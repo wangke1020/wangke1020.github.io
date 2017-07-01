@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>ioFun</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://iofun.net/"/>
+  <updated>2017-06-17T08:32:27.340Z</updated>
+  <id>http://iofun.net/</id>
+  
+  <author>
+    <name>wangke</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>CAP理论</title>
+    <link href="http://iofun.net/2017/06/09/CAP%E7%90%86%E8%AE%BA/"/>
+    <id>http://iofun.net/2017/06/09/CAP理论/</id>
+    <published>2017-06-09T15:47:19.000Z</published>
+    <updated>2017-06-17T08:32:27.340Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>CAP理论指对于一个分布式计算系统来说，不可能同时满足以下三点：</p>
+<ol>
+<li><p>一致性（Consistence)</p>
+<p> 一致性指的是所有节点总是访问到最新的数据，这里的一致性指的是强一致性，即<a href="http://cs.brown.edu/~mph/HerlihyW90/p463-herlihy.pdf" target="_blank" rel="external">!Linearizability</a>.</p>
+</li>
+<li><p>可用性（Availability）</p>
+<p>可用性指对于每一个没有宕机的节点，总是可以返回正确的结果。这里的可用性不同于“高可用”（也就是低宕机时间）。</p>
+</li>
+<li><p>分区容错性（Network Partitioning）</p>
+<p>分区容错性指即使发生了网络分区，节点仍然可以响应客户端的请求。  </p>
+</li>
+</ol>
+<p>CAP理论认为分布式系统最多只能CAP中的两点。</p>
+<p><img src="/image/CAP_theorem/CAP-Theorem-Example.png" alt=""></p>
+<p>常见的单机数据库如MYSQL不提供分区容忍，属于AP的系统。</p>
+<p>而对于近年来比较火热的NOSQL，设计时更多考虑水平扩展（Scale out），大多提供分区容忍。因而要在一致性和可用性之间做出选择。</p>
+<p>以Cassandra和HBase为例，Cassandra的P2P模型提供了良好的水平扩展能力，<br>默认提供最终一致性，选择了CAP中的AP。Cassandra也可以配置成强一致性，<br>这时就要失去了CAP中的可用性A。</p>
+<p>而HBase则是常见的主从架构，牺牲了可用性，选择了CP。</p>
+<h3 id="CAP理论的不足"><a href="#CAP理论的不足" class="headerlink" title="CAP理论的不足"></a>CAP理论的不足</h3><p>CAP理论提出以来，得到了计算机理论界的广泛认可。不过也有不少人指出CAP理论的不足之处。</p>
+<p>DANIEL ABADI 在他的博文 <a href="http://dbmsmusings.blogspot.co.il/2010/04/problems-with-cap-and-yahoos-little.html" target="_blank" rel="external">Problems with CAP, and Yahoo’s little known NoSQL system</a>指出了三点CAP的不足。</p>
+<ol>
+<li><p>CP系统表面的定义是支持一致性和分区容错性，没有可用性。但是一直不可用的系统是无用的。应该的定义是只有在发生网络分区时，才牺牲可用性。</p>
+</li>
+<li><p>CA 和 CP是相同的。发生网络分区时，才会有可用性的问题，这个系统是CP的。没有网络分区时，则是可用的（CA）。本质上是同一个系统的两种情况。</p>
+</li>
+<li><p>CAP理论无法描述分布式系统中的另外一个重要属性：延迟（latency)。</p>
+</li>
+</ol>
+<p>因此他建议使用 PACELC 来替换 CAP： 如果发生了网络分区（P），可用性（A）和一致性（C）如何选择，或者（E）在正常情况，延迟（L）和一致性（C）如何取舍。</p>
+<p>Dynamo在发生网络分区时，牺牲了一致性（C），选择了可用性（A）。正常情况下，为了降低延迟（L），放弃了强一致性（C）。所以Dynamo是PA/EL。</p>
+<p>MYSQL则始终提供强一致性（C），在某些情况下选择性的放弃了可用性（A）和低延迟（L）。所以MYSQL是PC/EC.</p>
+<h3 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h3><blockquote>
+<p><a href="https://en.wikipedia.org/wiki/CAP_theorem" target="_blank" rel="external">CAP_theorem Wiki</a></p>
+<p><a href="http://dbmsmusings.blogspot.co.il/2010/04/problems-with-cap-and-yahoos-little.html" target="_blank" rel="external">Problems with CAP, and Yahoo’s little known NoSQL system</a></p>
+<p><a href="https://martin.kleppmann.com/2015/05/11/please-stop-calling-databases-cp-or-ap.html" target="_blank" rel="external">Please stop calling databases CP or AP</a></p>
+</blockquote>
+<a id="more"></a>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;介绍&quot;&gt;&lt;a href=&quot;#介绍&quot; class=&quot;headerlink&quot; title=&quot;介绍&quot;&gt;&lt;/a&gt;介绍&lt;/h3&gt;&lt;p&gt;CAP理论指对于一个分布式计算系统来说，不可能同时满足以下三点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;一致性（Consistence)&lt;/p&gt;
+&lt;p&gt; 一致性指的是所有节点总是访问到最新的数据，这里的一致性指的是强一致性，即&lt;a href=&quot;http://cs.brown.edu/~mph/HerlihyW90/p463-herlihy.pdf&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;!Linearizability&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;可用性（Availability）&lt;/p&gt;
+&lt;p&gt;可用性指对于每一个没有宕机的节点，总是可以返回正确的结果。这里的可用性不同于“高可用”（也就是低宕机时间）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;分区容错性（Network Partitioning）&lt;/p&gt;
+&lt;p&gt;分区容错性指即使发生了网络分区，节点仍然可以响应客户端的请求。  &lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;CAP理论认为分布式系统最多只能CAP中的两点。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/CAP_theorem/CAP-Theorem-Example.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;p&gt;常见的单机数据库如MYSQL不提供分区容忍，属于AP的系统。&lt;/p&gt;
+&lt;p&gt;而对于近年来比较火热的NOSQL，设计时更多考虑水平扩展（Scale out），大多提供分区容忍。因而要在一致性和可用性之间做出选择。&lt;/p&gt;
+&lt;p&gt;以Cassandra和HBase为例，Cassandra的P2P模型提供了良好的水平扩展能力，&lt;br&gt;默认提供最终一致性，选择了CAP中的AP。Cassandra也可以配置成强一致性，&lt;br&gt;这时就要失去了CAP中的可用性A。&lt;/p&gt;
+&lt;p&gt;而HBase则是常见的主从架构，牺牲了可用性，选择了CP。&lt;/p&gt;
+&lt;h3 id=&quot;CAP理论的不足&quot;&gt;&lt;a href=&quot;#CAP理论的不足&quot; class=&quot;headerlink&quot; title=&quot;CAP理论的不足&quot;&gt;&lt;/a&gt;CAP理论的不足&lt;/h3&gt;&lt;p&gt;CAP理论提出以来，得到了计算机理论界的广泛认可。不过也有不少人指出CAP理论的不足之处。&lt;/p&gt;
+&lt;p&gt;DANIEL ABADI 在他的博文 &lt;a href=&quot;http://dbmsmusings.blogspot.co.il/2010/04/problems-with-cap-and-yahoos-little.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Problems with CAP, and Yahoo’s little known NoSQL system&lt;/a&gt;指出了三点CAP的不足。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;CP系统表面的定义是支持一致性和分区容错性，没有可用性。但是一直不可用的系统是无用的。应该的定义是只有在发生网络分区时，才牺牲可用性。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;CA 和 CP是相同的。发生网络分区时，才会有可用性的问题，这个系统是CP的。没有网络分区时，则是可用的（CA）。本质上是同一个系统的两种情况。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;CAP理论无法描述分布式系统中的另外一个重要属性：延迟（latency)。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;因此他建议使用 PACELC 来替换 CAP： 如果发生了网络分区（P），可用性（A）和一致性（C）如何选择，或者（E）在正常情况，延迟（L）和一致性（C）如何取舍。&lt;/p&gt;
+&lt;p&gt;Dynamo在发生网络分区时，牺牲了一致性（C），选择了可用性（A）。正常情况下，为了降低延迟（L），放弃了强一致性（C）。所以Dynamo是PA/EL。&lt;/p&gt;
+&lt;p&gt;MYSQL则始终提供强一致性（C），在某些情况下选择性的放弃了可用性（A）和低延迟（L）。所以MYSQL是PC/EC.&lt;/p&gt;
+&lt;h3 id=&quot;参考：&quot;&gt;&lt;a href=&quot;#参考：&quot; class=&quot;headerlink&quot; title=&quot;参考：&quot;&gt;&lt;/a&gt;参考：&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/CAP_theorem&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;CAP_theorem Wiki&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://dbmsmusings.blogspot.co.il/2010/04/problems-with-cap-and-yahoos-little.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Problems with CAP, and Yahoo’s little known NoSQL system&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://martin.kleppmann.com/2015/05/11/please-stop-calling-databases-cp-or-ap.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Please stop calling databases CP or AP&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Gossip Protocal</title>
+    <link href="http://iofun.net/2016/10/26/Gossip-Protocal/"/>
+    <id>http://iofun.net/2016/10/26/Gossip-Protocal/</id>
+    <published>2016-10-26T13:23:51.000Z</published>
+    <updated>2017-06-17T09:09:57.859Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="什么是Gossip协议"><a href="#什么是Gossip协议" class="headerlink" title="什么是Gossip协议"></a>什么是Gossip协议</h4><p>Gossip Protocol利用一种随机的方式将信息散播到整个网络中。正如Gossip本身的含义一样，Gossip协议的工作流程即类似于绯闻的传播，或者流行病的传播。</p>
+<h4 id="Epidemiology"><a href="#Epidemiology" class="headerlink" title="Epidemiology"></a>Epidemiology</h4><p>流行病传染最基本的模型仅作如下几个假设：</p>
+<ol>
+<li>(n+1)个人均匀的分布在一起</li>
+<li>每一对人群之间的传染概率是$\beta$，显然$0&lt;\beta&lt;1$.</li>
+<li>任意时刻，某个人要么处于infected的状态要么处于uninfected的状态.</li>
+<li>一旦某个人从uninfected状态转变成为infected状态，其一直停留在infected状态。</li>
+</ol>
+<p>有了以上假设，我们可以进一步分析流行病的传染情况。我们记t时刻处于infected状态的人数为$y_t$，处于uninfected状态的人为$x_t$，那么初始状态 $y_0=1$, $x_0=n$，并且在任何时候$x_t+y_t=n+1$.</p>
+<p>考虑连续的时间，可知：</p>
+<blockquote>
+<p>$\frac{dx}{dt}=−βxy$</p>
+</blockquote>
+<p>解为：</p>
+<blockquote>
+<p>$x=\frac{n(n+1)}{n+e^{β(n+1)t}}$<br>$y=\frac{n+1}{1+ne^{−β(n+1)t}}$</p>
+</blockquote>
+<p>明显，当$t→∞$时，$x→0,y→(n+1)x→0,y→(n+1)$，即经过足够的时间，所有的人都将被传染。</p>
+<p>如果每个人每次传染的人数是b,那么</p>
+<blockquote>
+<p>$\beta=\frac{b}{n}$</p>
+</blockquote>
+<p>令 t=$clog(n)$,可以得到 $y\approx(n+1)-\frac{1}{n^{cb-2}}$</p>
+<p>这表明，仅需要$O(log(n))$个回合，gossip协议即可将信息传递到所有的节点。 根据分析可得，Gossip协议具有以下的特点:</p>
+<ol>
+<li>低延迟。仅仅需要$O(log(n))$个回合的传递时间。</li>
+<li>非常可靠。仅有$\frac{1}{n^{cb-2}}$个节点不会收到信息。</li>
+<li>轻量级。每个节点传送了$cblog(n)$次信息。</li>
+</ol>
+<p>于此同时，Gossip协议的容错性比较高，例如，50的丢包率等价于使用b/2b带代替b进行分析；50的节点错误等价于使用n/2来代替nn，同时使用b/2来代替b进行分析，其分析结果不用带来数量级上的变化。</p>
+<h4 id="Gossip节点的通信方式"><a href="#Gossip节点的通信方式" class="headerlink" title="Gossip节点的通信方式"></a>Gossip节点的通信方式</h4><p>根据原论文，两个节点（A、B）之间存在三种通信方式:</p>
+<ul>
+<li>push: A节点将数据(key,value,version)及对应的版本号推送给B节点，B节点更新A中比自己新的数据</li>
+<li>pull：A仅将数据key,version推送给B，B将本地比A新的数据（Key,value,version）推送给A，A更新本地</li>
+<li>push/pull：与pull类似，只是多了一步，A再将本地比B新的数据推送给B，B更新本地</li>
+</ul>
+<p>如果把两个节点数据同步一次定义为一个周期，则在一个周期内，push需通信1次，pull需2次，push/pull则需3次，从效果上来讲，push/pull最好，理论上一个周期内可以使两个节点完全一致。直观上也感觉，push/pull的收敛速度是最快的。</p>
+<p>假设每个节点通信周期都能选择（感染）一个新节点，则Gossip算法退化为一个二分查找过程，每个周期构成一个平衡二叉树，收敛速度为$O(n^2)$，对应的时间开销则为$O(log(n))$。这也是Gossip理论上最优的收敛速度。但在实际情况中最优收敛速度是很难达到的，假设某个节点在第$i$个周期被感染的概率为$P_i$ ,第$i+1$个周期被感染的概率为$P^{i+1}$ ，则pull的方式:</p>
+<blockquote>
+<p>$P_{i+1}=P_i^{b+1}$</p>
+</blockquote>
+<p>而push为：</p>
+<blockquote>
+<p>$P_{i+1}=P_i(1-\frac{1}{n})^{n(1-P_i)}$</p>
+</blockquote>
+<p>显然pull的收敛速度大于push，而每个节点在每个周期被感染的概率都是固定的p(0&lt;p&lt;1)，因此Gossip算法是基于p的平方收敛，也成为概率收敛，这在众多的一致性算法中是非常独特的。</p>
+<a id="more"></a>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h4 id=&quot;什么是Gossip协议&quot;&gt;&lt;a href=&quot;#什么是Gossip协议&quot; class=&quot;headerlink&quot; title=&quot;什么是Gossip协议&quot;&gt;&lt;/a&gt;什么是Gossip协议&lt;/h4&gt;&lt;p&gt;Gossip Protocol利用一种随机的方式将信息散播到整个网络中。正如Gossip本身的含义一样，Gossip协议的工作流程即类似于绯闻的传播，或者流行病的传播。&lt;/p&gt;
+&lt;h4 id=&quot;Epidemiology&quot;&gt;&lt;a href=&quot;#Epidemiology&quot; class=&quot;headerlink&quot; title=&quot;Epidemiology&quot;&gt;&lt;/a&gt;Epidemiology&lt;/h4&gt;&lt;p&gt;流行病传染最基本的模型仅作如下几个假设：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;(n+1)个人均匀的分布在一起&lt;/li&gt;
+&lt;li&gt;每一对人群之间的传染概率是$\beta$，显然$0&amp;lt;\beta&amp;lt;1$.&lt;/li&gt;
+&lt;li&gt;任意时刻，某个人要么处于infected的状态要么处于uninfected的状态.&lt;/li&gt;
+&lt;li&gt;一旦某个人从uninfected状态转变成为infected状态，其一直停留在infected状态。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;有了以上假设，我们可以进一步分析流行病的传染情况。我们记t时刻处于infected状态的人数为$y_t$，处于uninfected状态的人为$x_t$，那么初始状态 $y_0=1$, $x_0=n$，并且在任何时候$x_t+y_t=n+1$.&lt;/p&gt;
+&lt;p&gt;考虑连续的时间，可知：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;$\frac{dx}{dt}=−βxy$&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;解为：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;$x=\frac{n(n+1)}{n+e^{β(n+1)t}}$&lt;br&gt;$y=\frac{n+1}{1+ne^{−β(n+1)t}}$&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;明显，当$t→∞$时，$x→0,y→(n+1)x→0,y→(n+1)$，即经过足够的时间，所有的人都将被传染。&lt;/p&gt;
+&lt;p&gt;如果每个人每次传染的人数是b,那么&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;$\beta=\frac{b}{n}$&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;令 t=$clog(n)$,可以得到 $y\approx(n+1)-\frac{1}{n^{cb-2}}$&lt;/p&gt;
+&lt;p&gt;这表明，仅需要$O(log(n))$个回合，gossip协议即可将信息传递到所有的节点。 根据分析可得，Gossip协议具有以下的特点:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;低延迟。仅仅需要$O(log(n))$个回合的传递时间。&lt;/li&gt;
+&lt;li&gt;非常可靠。仅有$\frac{1}{n^{cb-2}}$个节点不会收到信息。&lt;/li&gt;
+&lt;li&gt;轻量级。每个节点传送了$cblog(n)$次信息。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;于此同时，Gossip协议的容错性比较高，例如，50的丢包率等价于使用b/2b带代替b进行分析；50的节点错误等价于使用n/2来代替nn，同时使用b/2来代替b进行分析，其分析结果不用带来数量级上的变化。&lt;/p&gt;
+&lt;h4 id=&quot;Gossip节点的通信方式&quot;&gt;&lt;a href=&quot;#Gossip节点的通信方式&quot; class=&quot;headerlink&quot; title=&quot;Gossip节点的通信方式&quot;&gt;&lt;/a&gt;Gossip节点的通信方式&lt;/h4&gt;&lt;p&gt;根据原论文，两个节点（A、B）之间存在三种通信方式:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;push: A节点将数据(key,value,version)及对应的版本号推送给B节点，B节点更新A中比自己新的数据&lt;/li&gt;
+&lt;li&gt;pull：A仅将数据key,version推送给B，B将本地比A新的数据（Key,value,version）推送给A，A更新本地&lt;/li&gt;
+&lt;li&gt;push/pull：与pull类似，只是多了一步，A再将本地比B新的数据推送给B，B更新本地&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果把两个节点数据同步一次定义为一个周期，则在一个周期内，push需通信1次，pull需2次，push/pull则需3次，从效果上来讲，push/pull最好，理论上一个周期内可以使两个节点完全一致。直观上也感觉，push/pull的收敛速度是最快的。&lt;/p&gt;
+&lt;p&gt;假设每个节点通信周期都能选择（感染）一个新节点，则Gossip算法退化为一个二分查找过程，每个周期构成一个平衡二叉树，收敛速度为$O(n^2)$，对应的时间开销则为$O(log(n))$。这也是Gossip理论上最优的收敛速度。但在实际情况中最优收敛速度是很难达到的，假设某个节点在第$i$个周期被感染的概率为$P_i$ ,第$i+1$个周期被感染的概率为$P^{i+1}$ ，则pull的方式:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;$P_{i+1}=P_i^{b+1}$&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;而push为：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;$P_{i+1}=P_i(1-\frac{1}{n})^{n(1-P_i)}$&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;显然pull的收敛速度大于push，而每个节点在每个周期被感染的概率都是固定的p(0&amp;lt;p&amp;lt;1)，因此Gossip算法是基于p的平方收敛，也成为概率收敛，这在众多的一致性算法中是非常独特的。&lt;/p&gt;
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>pipe and fork</title>
+    <link href="http://iofun.net/2016/09/19/fork-and-pipe/"/>
+    <id>http://iofun.net/2016/09/19/fork-and-pipe/</id>
+    <published>2016-09-19T14:51:09.000Z</published>
+    <updated>2017-05-18T13:32:54.924Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="Pipe-Introduction"><a href="#Pipe-Introduction" class="headerlink" title="Pipe Introduction"></a>Pipe Introduction</h2><p>Every program we run on the command line automatically has three data streams connected to it.</p>
+<p>STDIN (0) - Standard input (data fed into the program)<br>STDOUT (1) - Standard output (data printed by the program, defaults to the terminal)<br>STDERR (2) - Standard error (for error messages, also defaults to the terminal)</p>
+<p><img src="/image/pipe_and_fork/streams.png" alt="streams"></p>
+<h2 id="Create-a-simple-pipe-in-C"><a href="#Create-a-simple-pipe-in-C" class="headerlink" title="Create a simple pipe in C"></a>Create a simple pipe in C</h2><p>To create a simple pipe with C, we make use of the pipe() system call. It takes a single argument, which is an array of two integers, and if successful, the array will contain two new file descriptors to be used for the pipeline. After creating a pipe, the process typically spawns a new process (remember the child inherits open file descriptors).</p>
+<blockquote>
+<p>SYSTEM CALL: pipe();                                                          </p>
+<p>  PROTOTYPE: int pipe( int fd[2] );<br>    RETURNS: 0 on success<br>             -1 on error: errno = EMFILE (no free descriptors)<br>                                  EMFILE (system file table is full)<br>                                  EFAULT (fd array is not valid)                </p>
+</blockquote>
+<p>NOTES: fd[0] is set up for reading, fd[1] is set up for writing</p>
+<p>code example:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">#include &lt;stdio.h&gt;</div><div class="line">#include &lt;unistd.h&gt;</div><div class="line">#include &lt;sys/types.h&gt;</div><div class="line"></div><div class="line">main()</div><div class="line">&#123;</div><div class="line">    int     fd[2];</div><div class="line">    pid_t   childpid;</div><div class="line"></div><div class="line">    pipe(fd);</div><div class="line">    .</div><div class="line">    .</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>After pipe is invoked, fd[0] and fd[1] are connected as following picture.</p>
+<p><img src="/image/pipe_and_fork/pipe.png" alt="pipe"></p>
+<a id="more"></a>
+<h3 id="Use-fork-and-pipe"><a href="#Use-fork-and-pipe" class="headerlink" title="Use fork and pipe"></a>Use fork and pipe</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">#include &lt;stdio.h&gt;</div><div class="line">#include &lt;unistd.h&gt;</div><div class="line">#include &lt;sys/types.h&gt;</div><div class="line"></div><div class="line">main()</div><div class="line">&#123;</div><div class="line">        int     fd[2];</div><div class="line">        pid_t   childpid;</div><div class="line"></div><div class="line">        pipe(fd);</div><div class="line"></div><div class="line">        if((childpid = fork()) == -1)</div><div class="line">        &#123;</div><div class="line">                perror(&quot;fork&quot;);</div><div class="line">                exit(1);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if(childpid == 0)</div><div class="line">        &#123;</div><div class="line">                /* Child process closes up input side of pipe */</div><div class="line">                close(fd[0]);</div><div class="line">        &#125;</div><div class="line">        else</div><div class="line">        &#123;</div><div class="line">                /* Parent process closes up output side of pipe */</div><div class="line">                close(fd[1]);</div><div class="line">        &#125;</div><div class="line">        .</div><div class="line">        .</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>After fork is called, child process is created and it also have the two file descriptors.</p>
+<p><img src="/image/pipe_and_fork/pipe_and_fork.png" alt="pipe_and_fork"></p>
+<p>If the parent wants to receive data from the child, it should close fd1, and the child should close fd0. If the parent wants to send data to the child, it should close fd0, and the child should close fd1. Since descriptors are shared between the parent and child, we should always be sure to close the end of pipe we aren’t concerned with. On a technical note, the EOF will never be returned if the unnecessary ends of the pipe are not explicitly closed.</p>
+<p><img src="/image/pipe_and_fork/after_close_unused_ends.png" alt="pipe_and_fork"></p>
+<p> Once the pipeline has been established, the file descriptors may be treated like descriptors to normal files.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">/*****************************************************************************</div><div class="line"> Excerpt from &quot;Linux Programmer&apos;s Guide - Chapter 6&quot;</div><div class="line"> (C)opyright 1994-1995, Scott Burkett</div><div class="line"> *****************************************************************************</div><div class="line"> MODULE: pipe.c</div><div class="line"> *****************************************************************************/</div><div class="line"></div><div class="line">#include &lt;stdio.h&gt;</div><div class="line">#include &lt;unistd.h&gt;</div><div class="line">#include &lt;sys/types.h&gt;</div><div class="line"></div><div class="line">int main(void)</div><div class="line">&#123;</div><div class="line">        int     fd[2], nbytes;</div><div class="line">        pid_t   childpid;</div><div class="line">        char    string[] = &quot;Hello, world!\n&quot;;</div><div class="line">        char    readbuffer[80];</div><div class="line"></div><div class="line">        pipe(fd);</div><div class="line"></div><div class="line">        if((childpid = fork()) == -1)</div><div class="line">        &#123;</div><div class="line">                perror(&quot;fork&quot;);</div><div class="line">                exit(1);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if(childpid == 0)</div><div class="line">        &#123;</div><div class="line">                /* Child process closes up input side of pipe */</div><div class="line">                close(fd[0]);</div><div class="line"></div><div class="line">                /* Send &quot;string&quot; through the output side of pipe */</div><div class="line">                write(fd[1], string, (strlen(string)+1));</div><div class="line">                exit(0);</div><div class="line">        &#125;</div><div class="line">        else</div><div class="line">        &#123;</div><div class="line">                /* Parent process closes up output side of pipe */</div><div class="line">                close(fd[1]);</div><div class="line"></div><div class="line">                /* Read in a string from the pipe */</div><div class="line">                nbytes = read(fd[0], readbuffer, sizeof(readbuffer));</div><div class="line">                printf(&quot;Received string: %s&quot;, readbuffer);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        return(0);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference:"></a>Reference:</h3><ul>
+<li><a href="http://tldp.org/LDP/lpg/node11.html" target="_blank" rel="external">http://tldp.org/LDP/lpg/node11.html</a></li>
+<li><a href="https://upsilon.cc/~zack/teaching/1314/progsyst/cours-03-pipe.pdf" target="_blank" rel="external">https://upsilon.cc/~zack/teaching/1314/progsyst/cours-03-pipe.pdf</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;Pipe-Introduction&quot;&gt;&lt;a href=&quot;#Pipe-Introduction&quot; class=&quot;headerlink&quot; title=&quot;Pipe Introduction&quot;&gt;&lt;/a&gt;Pipe Introduction&lt;/h2&gt;&lt;p&gt;Every program we run on the command line automatically has three data streams connected to it.&lt;/p&gt;
+&lt;p&gt;STDIN (0) - Standard input (data fed into the program)&lt;br&gt;STDOUT (1) - Standard output (data printed by the program, defaults to the terminal)&lt;br&gt;STDERR (2) - Standard error (for error messages, also defaults to the terminal)&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/pipe_and_fork/streams.png&quot; alt=&quot;streams&quot;&gt;&lt;/p&gt;
+&lt;h2 id=&quot;Create-a-simple-pipe-in-C&quot;&gt;&lt;a href=&quot;#Create-a-simple-pipe-in-C&quot; class=&quot;headerlink&quot; title=&quot;Create a simple pipe in C&quot;&gt;&lt;/a&gt;Create a simple pipe in C&lt;/h2&gt;&lt;p&gt;To create a simple pipe with C, we make use of the pipe() system call. It takes a single argument, which is an array of two integers, and if successful, the array will contain two new file descriptors to be used for the pipeline. After creating a pipe, the process typically spawns a new process (remember the child inherits open file descriptors).&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;SYSTEM CALL: pipe();                                                          &lt;/p&gt;
+&lt;p&gt;  PROTOTYPE: int pipe( int fd[2] );&lt;br&gt;    RETURNS: 0 on success&lt;br&gt;             -1 on error: errno = EMFILE (no free descriptors)&lt;br&gt;                                  EMFILE (system file table is full)&lt;br&gt;                                  EFAULT (fd array is not valid)                &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;NOTES: fd[0] is set up for reading, fd[1] is set up for writing&lt;/p&gt;
+&lt;p&gt;code example:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;11&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;12&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;13&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;#include &amp;lt;stdio.h&amp;gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;#include &amp;lt;unistd.h&amp;gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;#include &amp;lt;sys/types.h&amp;gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;main()&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&amp;#123;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    int     fd[2];&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    pid_t   childpid;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    pipe(fd);&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    .&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;    .&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&amp;#125;&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;After pipe is invoked, fd[0] and fd[1] are connected as following picture.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/pipe_and_fork/pipe.png&quot; alt=&quot;pipe&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+  </entry>
+  
+</feed>

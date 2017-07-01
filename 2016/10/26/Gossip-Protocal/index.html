@@ -1,48 +1,48 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> Gossip Protocal · ioFun</title><meta name="description" content="Gossip Protocal - wangke"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://iofun.net/atom.xml" title="ioFun"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/wangke1020" target="_blank" class="nav-list-link">GITHUB</a></li></ul></header><section class="container"><div class="post"><article class="post-block"><h1 class="post-title">Gossip Protocal</h1><div class="post-info">2016年10月26日</div><div class="post-content"><h4 id="什么是Gossip协议"><a href="#什么是Gossip协议" class="headerlink" title="什么是Gossip协议"></a>什么是Gossip协议</h4><p>Gossip Protocol利用一种随机的方式将信息散播到整个网络中。正如Gossip本身的含义一样，Gossip协议的工作流程即类似于绯闻的传播，或者流行病的传播。</p>
-<h4 id="Epidemiology"><a href="#Epidemiology" class="headerlink" title="Epidemiology"></a>Epidemiology</h4><p>流行病传染最基本的模型仅作如下几个假设：</p>
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> Gossip Protocal · ioFun</title><meta name="description" content="Gossip Protocal - wangke"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://iofun.net/atom.xml" title="ioFun"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/favicon.png" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">Gossip Protocal</h1><div class="post-info">2016年10月26日</div><div class="post-content"><h4 id="&#x4EC0;&#x4E48;&#x662F;Gossip&#x534F;&#x8BAE;"><a href="#&#x4EC0;&#x4E48;&#x662F;Gossip&#x534F;&#x8BAE;" class="headerlink" title="&#x4EC0;&#x4E48;&#x662F;Gossip&#x534F;&#x8BAE;"></a>&#x4EC0;&#x4E48;&#x662F;Gossip&#x534F;&#x8BAE;</h4><p>Gossip Protocol&#x5229;&#x7528;&#x4E00;&#x79CD;&#x968F;&#x673A;&#x7684;&#x65B9;&#x5F0F;&#x5C06;&#x4FE1;&#x606F;&#x6563;&#x64AD;&#x5230;&#x6574;&#x4E2A;&#x7F51;&#x7EDC;&#x4E2D;&#x3002;&#x6B63;&#x5982;Gossip&#x672C;&#x8EAB;&#x7684;&#x542B;&#x4E49;&#x4E00;&#x6837;&#xFF0C;Gossip&#x534F;&#x8BAE;&#x7684;&#x5DE5;&#x4F5C;&#x6D41;&#x7A0B;&#x5373;&#x7C7B;&#x4F3C;&#x4E8E;&#x7EEF;&#x95FB;&#x7684;&#x4F20;&#x64AD;&#xFF0C;&#x6216;&#x8005;&#x6D41;&#x884C;&#x75C5;&#x7684;&#x4F20;&#x64AD;&#x3002;</p>
+<h4 id="Epidemiology"><a href="#Epidemiology" class="headerlink" title="Epidemiology"></a>Epidemiology</h4><p>&#x6D41;&#x884C;&#x75C5;&#x4F20;&#x67D3;&#x6700;&#x57FA;&#x672C;&#x7684;&#x6A21;&#x578B;&#x4EC5;&#x4F5C;&#x5982;&#x4E0B;&#x51E0;&#x4E2A;&#x5047;&#x8BBE;&#xFF1A;</p>
 <ol>
-<li>(n+1)个人均匀的分布在一起</li>
-<li>每一对人群之间的传染概率是$\beta$，显然$0&lt;\beta&lt;1$.</li>
-<li>任意时刻，某个人要么处于infected的状态要么处于uninfected的状态.</li>
-<li>一旦某个人从uninfected状态转变成为infected状态，其一直停留在infected状态。</li>
+<li>(n+1)&#x4E2A;&#x4EBA;&#x5747;&#x5300;&#x7684;&#x5206;&#x5E03;&#x5728;&#x4E00;&#x8D77;</li>
+<li>&#x6BCF;&#x4E00;&#x5BF9;&#x4EBA;&#x7FA4;&#x4E4B;&#x95F4;&#x7684;&#x4F20;&#x67D3;&#x6982;&#x7387;&#x662F;$\beta$&#xFF0C;&#x663E;&#x7136;$0&lt;\beta&lt;1$.</li>
+<li>&#x4EFB;&#x610F;&#x65F6;&#x523B;&#xFF0C;&#x67D0;&#x4E2A;&#x4EBA;&#x8981;&#x4E48;&#x5904;&#x4E8E;infected&#x7684;&#x72B6;&#x6001;&#x8981;&#x4E48;&#x5904;&#x4E8E;uninfected&#x7684;&#x72B6;&#x6001;.</li>
+<li>&#x4E00;&#x65E6;&#x67D0;&#x4E2A;&#x4EBA;&#x4ECE;uninfected&#x72B6;&#x6001;&#x8F6C;&#x53D8;&#x6210;&#x4E3A;infected&#x72B6;&#x6001;&#xFF0C;&#x5176;&#x4E00;&#x76F4;&#x505C;&#x7559;&#x5728;infected&#x72B6;&#x6001;&#x3002;</li>
 </ol>
-<p>有了以上假设，我们可以进一步分析流行病的传染情况。我们记t时刻处于infected状态的人数为$y_t$，处于uninfected状态的人为$x_t$，那么初始状态 $y_0=1$, $x_0=n$，并且在任何时候$x_t+y_t=n+1$.</p>
-<p>考虑连续的时间，可知：</p>
+<p>&#x6709;&#x4E86;&#x4EE5;&#x4E0A;&#x5047;&#x8BBE;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x8FDB;&#x4E00;&#x6B65;&#x5206;&#x6790;&#x6D41;&#x884C;&#x75C5;&#x7684;&#x4F20;&#x67D3;&#x60C5;&#x51B5;&#x3002;&#x6211;&#x4EEC;&#x8BB0;t&#x65F6;&#x523B;&#x5904;&#x4E8E;infected&#x72B6;&#x6001;&#x7684;&#x4EBA;&#x6570;&#x4E3A;$y_t$&#xFF0C;&#x5904;&#x4E8E;uninfected&#x72B6;&#x6001;&#x7684;&#x4EBA;&#x4E3A;$x_t$&#xFF0C;&#x90A3;&#x4E48;&#x521D;&#x59CB;&#x72B6;&#x6001; $y_0=1$, $x_0=n$&#xFF0C;&#x5E76;&#x4E14;&#x5728;&#x4EFB;&#x4F55;&#x65F6;&#x5019;$x_t+y_t=n+1$.</p>
+<p>&#x8003;&#x8651;&#x8FDE;&#x7EED;&#x7684;&#x65F6;&#x95F4;&#xFF0C;&#x53EF;&#x77E5;&#xFF1A;</p>
 <blockquote>
-<p>$\frac{dx}{dt}=−βxy$</p>
+<p>$\frac{dx}{dt}=&#x2212;&#x3B2;xy$</p>
 </blockquote>
-<p>解为：</p>
+<p>&#x89E3;&#x4E3A;&#xFF1A;</p>
 <blockquote>
-<p>$x=\frac{n(n+1)}{n+e^{β(n+1)t}}$<br>$y=\frac{n+1}{1+ne^{−β(n+1)t}}$</p>
+<p>$x=\frac{n(n+1)}{n+e^{&#x3B2;(n+1)t}}$<br>$y=\frac{n+1}{1+ne^{&#x2212;&#x3B2;(n+1)t}}$</p>
 </blockquote>
-<p>明显，当$t→∞$时，$x→0,y→(n+1)x→0,y→(n+1)$，即经过足够的时间，所有的人都将被传染。</p>
-<p>如果每个人每次传染的人数是b,那么</p>
+<p>&#x660E;&#x663E;&#xFF0C;&#x5F53;$t&#x2192;&#x221E;$&#x65F6;&#xFF0C;$x&#x2192;0,y&#x2192;(n+1)x&#x2192;0,y&#x2192;(n+1)$&#xFF0C;&#x5373;&#x7ECF;&#x8FC7;&#x8DB3;&#x591F;&#x7684;&#x65F6;&#x95F4;&#xFF0C;&#x6240;&#x6709;&#x7684;&#x4EBA;&#x90FD;&#x5C06;&#x88AB;&#x4F20;&#x67D3;&#x3002;</p>
+<p>&#x5982;&#x679C;&#x6BCF;&#x4E2A;&#x4EBA;&#x6BCF;&#x6B21;&#x4F20;&#x67D3;&#x7684;&#x4EBA;&#x6570;&#x662F;b,&#x90A3;&#x4E48;</p>
 <blockquote>
 <p>$\beta=\frac{b}{n}$</p>
 </blockquote>
-<p>令 t=$clog(n)$,可以得到 $y\approx(n+1)-\frac{1}{n^{cb-2}}$</p>
-<p>这表明，仅需要$O(log(n))$个回合，gossip协议即可将信息传递到所有的节点。 根据分析可得，Gossip协议具有以下的特点:</p>
+<p>&#x4EE4; t=$clog(n)$,&#x53EF;&#x4EE5;&#x5F97;&#x5230; $y\approx(n+1)-\frac{1}{n^{cb-2}}$</p>
+<p>&#x8FD9;&#x8868;&#x660E;&#xFF0C;&#x4EC5;&#x9700;&#x8981;$O(log(n))$&#x4E2A;&#x56DE;&#x5408;&#xFF0C;gossip&#x534F;&#x8BAE;&#x5373;&#x53EF;&#x5C06;&#x4FE1;&#x606F;&#x4F20;&#x9012;&#x5230;&#x6240;&#x6709;&#x7684;&#x8282;&#x70B9;&#x3002; &#x6839;&#x636E;&#x5206;&#x6790;&#x53EF;&#x5F97;&#xFF0C;Gossip&#x534F;&#x8BAE;&#x5177;&#x6709;&#x4EE5;&#x4E0B;&#x7684;&#x7279;&#x70B9;:</p>
 <ol>
-<li>低延迟。仅仅需要$O(log(n))$个回合的传递时间。</li>
-<li>非常可靠。仅有$\frac{1}{n^{cb-2}}$个节点不会收到信息。</li>
-<li>轻量级。每个节点传送了$cblog(n)$次信息。</li>
+<li>&#x4F4E;&#x5EF6;&#x8FDF;&#x3002;&#x4EC5;&#x4EC5;&#x9700;&#x8981;$O(log(n))$&#x4E2A;&#x56DE;&#x5408;&#x7684;&#x4F20;&#x9012;&#x65F6;&#x95F4;&#x3002;</li>
+<li>&#x975E;&#x5E38;&#x53EF;&#x9760;&#x3002;&#x4EC5;&#x6709;$\frac{1}{n^{cb-2}}$&#x4E2A;&#x8282;&#x70B9;&#x4E0D;&#x4F1A;&#x6536;&#x5230;&#x4FE1;&#x606F;&#x3002;</li>
+<li>&#x8F7B;&#x91CF;&#x7EA7;&#x3002;&#x6BCF;&#x4E2A;&#x8282;&#x70B9;&#x4F20;&#x9001;&#x4E86;$cblog(n)$&#x6B21;&#x4FE1;&#x606F;&#x3002;</li>
 </ol>
-<p>于此同时，Gossip协议的容错性比较高，例如，50的丢包率等价于使用b/2b带代替b进行分析；50的节点错误等价于使用n/2来代替nn，同时使用b/2来代替b进行分析，其分析结果不用带来数量级上的变化。</p>
-<h4 id="Gossip节点的通信方式"><a href="#Gossip节点的通信方式" class="headerlink" title="Gossip节点的通信方式"></a>Gossip节点的通信方式</h4><p>根据原论文，两个节点（A、B）之间存在三种通信方式:</p>
+<p>&#x4E8E;&#x6B64;&#x540C;&#x65F6;&#xFF0C;Gossip&#x534F;&#x8BAE;&#x7684;&#x5BB9;&#x9519;&#x6027;&#x6BD4;&#x8F83;&#x9AD8;&#xFF0C;&#x4F8B;&#x5982;&#xFF0C;50&#x7684;&#x4E22;&#x5305;&#x7387;&#x7B49;&#x4EF7;&#x4E8E;&#x4F7F;&#x7528;b/2b&#x5E26;&#x4EE3;&#x66FF;b&#x8FDB;&#x884C;&#x5206;&#x6790;&#xFF1B;50&#x7684;&#x8282;&#x70B9;&#x9519;&#x8BEF;&#x7B49;&#x4EF7;&#x4E8E;&#x4F7F;&#x7528;n/2&#x6765;&#x4EE3;&#x66FF;nn&#xFF0C;&#x540C;&#x65F6;&#x4F7F;&#x7528;b/2&#x6765;&#x4EE3;&#x66FF;b&#x8FDB;&#x884C;&#x5206;&#x6790;&#xFF0C;&#x5176;&#x5206;&#x6790;&#x7ED3;&#x679C;&#x4E0D;&#x7528;&#x5E26;&#x6765;&#x6570;&#x91CF;&#x7EA7;&#x4E0A;&#x7684;&#x53D8;&#x5316;&#x3002;</p>
+<h4 id="Gossip&#x8282;&#x70B9;&#x7684;&#x901A;&#x4FE1;&#x65B9;&#x5F0F;"><a href="#Gossip&#x8282;&#x70B9;&#x7684;&#x901A;&#x4FE1;&#x65B9;&#x5F0F;" class="headerlink" title="Gossip&#x8282;&#x70B9;&#x7684;&#x901A;&#x4FE1;&#x65B9;&#x5F0F;"></a>Gossip&#x8282;&#x70B9;&#x7684;&#x901A;&#x4FE1;&#x65B9;&#x5F0F;</h4><p>&#x6839;&#x636E;&#x539F;&#x8BBA;&#x6587;&#xFF0C;&#x4E24;&#x4E2A;&#x8282;&#x70B9;&#xFF08;A&#x3001;B&#xFF09;&#x4E4B;&#x95F4;&#x5B58;&#x5728;&#x4E09;&#x79CD;&#x901A;&#x4FE1;&#x65B9;&#x5F0F;:</p>
 <ul>
-<li>push: A节点将数据(key,value,version)及对应的版本号推送给B节点，B节点更新A中比自己新的数据</li>
-<li>pull：A仅将数据key,version推送给B，B将本地比A新的数据（Key,value,version）推送给A，A更新本地</li>
-<li>push/pull：与pull类似，只是多了一步，A再将本地比B新的数据推送给B，B更新本地</li>
+<li>push: A&#x8282;&#x70B9;&#x5C06;&#x6570;&#x636E;(key,value,version)&#x53CA;&#x5BF9;&#x5E94;&#x7684;&#x7248;&#x672C;&#x53F7;&#x63A8;&#x9001;&#x7ED9;B&#x8282;&#x70B9;&#xFF0C;B&#x8282;&#x70B9;&#x66F4;&#x65B0;A&#x4E2D;&#x6BD4;&#x81EA;&#x5DF1;&#x65B0;&#x7684;&#x6570;&#x636E;</li>
+<li>pull&#xFF1A;A&#x4EC5;&#x5C06;&#x6570;&#x636E;key,version&#x63A8;&#x9001;&#x7ED9;B&#xFF0C;B&#x5C06;&#x672C;&#x5730;&#x6BD4;A&#x65B0;&#x7684;&#x6570;&#x636E;&#xFF08;Key,value,version&#xFF09;&#x63A8;&#x9001;&#x7ED9;A&#xFF0C;A&#x66F4;&#x65B0;&#x672C;&#x5730;</li>
+<li>push/pull&#xFF1A;&#x4E0E;pull&#x7C7B;&#x4F3C;&#xFF0C;&#x53EA;&#x662F;&#x591A;&#x4E86;&#x4E00;&#x6B65;&#xFF0C;A&#x518D;&#x5C06;&#x672C;&#x5730;&#x6BD4;B&#x65B0;&#x7684;&#x6570;&#x636E;&#x63A8;&#x9001;&#x7ED9;B&#xFF0C;B&#x66F4;&#x65B0;&#x672C;&#x5730;</li>
 </ul>
-<p>如果把两个节点数据同步一次定义为一个周期，则在一个周期内，push需通信1次，pull需2次，push/pull则需3次，从效果上来讲，push/pull最好，理论上一个周期内可以使两个节点完全一致。直观上也感觉，push/pull的收敛速度是最快的。</p>
-<p>假设每个节点通信周期都能选择（感染）一个新节点，则Gossip算法退化为一个二分查找过程，每个周期构成一个平衡二叉树，收敛速度为$O(n^2)$，对应的时间开销则为$O(log(n))$。这也是Gossip理论上最优的收敛速度。但在实际情况中最优收敛速度是很难达到的，假设某个节点在第$i$个周期被感染的概率为$P_i$ ,第$i+1$个周期被感染的概率为$P^{i+1}$ ，则pull的方式:</p>
+<p>&#x5982;&#x679C;&#x628A;&#x4E24;&#x4E2A;&#x8282;&#x70B9;&#x6570;&#x636E;&#x540C;&#x6B65;&#x4E00;&#x6B21;&#x5B9A;&#x4E49;&#x4E3A;&#x4E00;&#x4E2A;&#x5468;&#x671F;&#xFF0C;&#x5219;&#x5728;&#x4E00;&#x4E2A;&#x5468;&#x671F;&#x5185;&#xFF0C;push&#x9700;&#x901A;&#x4FE1;1&#x6B21;&#xFF0C;pull&#x9700;2&#x6B21;&#xFF0C;push/pull&#x5219;&#x9700;3&#x6B21;&#xFF0C;&#x4ECE;&#x6548;&#x679C;&#x4E0A;&#x6765;&#x8BB2;&#xFF0C;push/pull&#x6700;&#x597D;&#xFF0C;&#x7406;&#x8BBA;&#x4E0A;&#x4E00;&#x4E2A;&#x5468;&#x671F;&#x5185;&#x53EF;&#x4EE5;&#x4F7F;&#x4E24;&#x4E2A;&#x8282;&#x70B9;&#x5B8C;&#x5168;&#x4E00;&#x81F4;&#x3002;&#x76F4;&#x89C2;&#x4E0A;&#x4E5F;&#x611F;&#x89C9;&#xFF0C;push/pull&#x7684;&#x6536;&#x655B;&#x901F;&#x5EA6;&#x662F;&#x6700;&#x5FEB;&#x7684;&#x3002;</p>
+<p>&#x5047;&#x8BBE;&#x6BCF;&#x4E2A;&#x8282;&#x70B9;&#x901A;&#x4FE1;&#x5468;&#x671F;&#x90FD;&#x80FD;&#x9009;&#x62E9;&#xFF08;&#x611F;&#x67D3;&#xFF09;&#x4E00;&#x4E2A;&#x65B0;&#x8282;&#x70B9;&#xFF0C;&#x5219;Gossip&#x7B97;&#x6CD5;&#x9000;&#x5316;&#x4E3A;&#x4E00;&#x4E2A;&#x4E8C;&#x5206;&#x67E5;&#x627E;&#x8FC7;&#x7A0B;&#xFF0C;&#x6BCF;&#x4E2A;&#x5468;&#x671F;&#x6784;&#x6210;&#x4E00;&#x4E2A;&#x5E73;&#x8861;&#x4E8C;&#x53C9;&#x6811;&#xFF0C;&#x6536;&#x655B;&#x901F;&#x5EA6;&#x4E3A;$O(n^2)$&#xFF0C;&#x5BF9;&#x5E94;&#x7684;&#x65F6;&#x95F4;&#x5F00;&#x9500;&#x5219;&#x4E3A;$O(log(n))$&#x3002;&#x8FD9;&#x4E5F;&#x662F;Gossip&#x7406;&#x8BBA;&#x4E0A;&#x6700;&#x4F18;&#x7684;&#x6536;&#x655B;&#x901F;&#x5EA6;&#x3002;&#x4F46;&#x5728;&#x5B9E;&#x9645;&#x60C5;&#x51B5;&#x4E2D;&#x6700;&#x4F18;&#x6536;&#x655B;&#x901F;&#x5EA6;&#x662F;&#x5F88;&#x96BE;&#x8FBE;&#x5230;&#x7684;&#xFF0C;&#x5047;&#x8BBE;&#x67D0;&#x4E2A;&#x8282;&#x70B9;&#x5728;&#x7B2C;$i$&#x4E2A;&#x5468;&#x671F;&#x88AB;&#x611F;&#x67D3;&#x7684;&#x6982;&#x7387;&#x4E3A;$P_i$ ,&#x7B2C;$i+1$&#x4E2A;&#x5468;&#x671F;&#x88AB;&#x611F;&#x67D3;&#x7684;&#x6982;&#x7387;&#x4E3A;$P^{i+1}$ &#xFF0C;&#x5219;pull&#x7684;&#x65B9;&#x5F0F;:</p>
 <blockquote>
 <p>$P_{i+1}=P_i^{b+1}$</p>
 </blockquote>
-<p>而push为：</p>
+<p>&#x800C;push&#x4E3A;&#xFF1A;</p>
 <blockquote>
 <p>$P_{i+1}=P_i(1-\frac{1}{n})^{n(1-P_i)}$</p>
 </blockquote>
-<p>显然pull的收敛速度大于push，而每个节点在每个周期被感染的概率都是固定的p(0&lt;p&lt;1)，因此Gossip算法是基于p的平方收敛，也成为概率收敛，这在众多的一致性算法中是非常独特的。</p>
+<p>&#x663E;&#x7136;pull&#x7684;&#x6536;&#x655B;&#x901F;&#x5EA6;&#x5927;&#x4E8E;push&#xFF0C;&#x800C;&#x6BCF;&#x4E2A;&#x8282;&#x70B9;&#x5728;&#x6BCF;&#x4E2A;&#x5468;&#x671F;&#x88AB;&#x611F;&#x67D3;&#x7684;&#x6982;&#x7387;&#x90FD;&#x662F;&#x56FA;&#x5B9A;&#x7684;p(0&lt;p&lt;1)&#xFF0C;&#x56E0;&#x6B64;Gossip&#x7B97;&#x6CD5;&#x662F;&#x57FA;&#x4E8E;p&#x7684;&#x5E73;&#x65B9;&#x6536;&#x655B;&#xFF0C;&#x4E5F;&#x6210;&#x4E3A;&#x6982;&#x7387;&#x6536;&#x655B;&#xFF0C;&#x8FD9;&#x5728;&#x4F17;&#x591A;&#x7684;&#x4E00;&#x81F4;&#x6027;&#x7B97;&#x6CD5;&#x4E2D;&#x662F;&#x975E;&#x5E38;&#x72EC;&#x7279;&#x7684;&#x3002;</p>
 <a id="more"></a>
-</div></article></div></section><footer><div class="paginator"><a href="/2017/06/09/CAP理论/" class="prev">PREV</a><a href="/2016/09/19/fork-and-pipe/" class="next">NEXT</a></div><div class="copyright"><p>© 2015 - 2017 <a href="http://iofun.net">wangke</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-MML-AM_CHTML"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>
+</div></article></div></main><footer><div class="paginator"><a href="/2017/06/09/CAP理论/" class="prev">PREV</a><a href="/2016/09/19/fork-and-pipe/" class="next">NEXT</a></div><div class="copyright"><p>© 2015 - 2017 <a href="http://iofun.net">wangke</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script></body></html>

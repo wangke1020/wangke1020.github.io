@@ -1,7 +1,7 @@
 baseURL = 'https://iofun.me/'
 languageCode = 'en-us'
 title = 'iofun'
-theme = "loveit"
+theme = "cactus"
 
 [[menu.main]]
 name = "Home"

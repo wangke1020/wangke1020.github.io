@@ -33,3 +33,4 @@ jobs:
         deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
         publish_dir: ./public
         publish_branch: publish
+        cname: iofun.me

@@ -1,7 +1,7 @@
 baseURL = 'https://iofun.me/'
 languageCode = 'en-us'
 title = 'iofun'
-theme = "cactus"
+theme = "loveit"
 
 [[menu.main]]
 name = "Home"
@@ -15,6 +15,7 @@ weight = 2
 
 
 [params]
+  version = "0.2.X"
   colortheme = "classic" # dark, light, white, or classic
   mathjax = true  # not required
   showAllPostsArchive = true
@@ -34,6 +35,6 @@ weight = 2
     lineNoStart = 1
     lineNos = true
     lineNumbersInTable = true
-    noClasses = true
-    style = "dracula"
+    noClasses = false
+    style = "emacs"
     tabWidth = 4

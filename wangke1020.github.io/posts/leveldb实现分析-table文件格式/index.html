@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <link rel="preload" href="/lib/font-awesome/webfonts/fa-brands-400.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="/lib/font-awesome/webfonts/fa-regular-400.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="/lib/font-awesome/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link rel="preload" href="/lib/JetBrainsMono/web/woff2/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <script type="text/javascript" src="https://latest.cactus.chat/cactus.js"></script>
+  <link rel="stylesheet" href="https://latest.cactus.chat/style.css" type="text/css">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title> leveldb实现分析-table文件格式 | iofun</title>
+  <link rel = 'canonical' href = 'https://iofun.me/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/'>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="all,follow">
+  <meta name="googlebot" content="index,follow,snippet,archive">
+  <meta property="og:title" content="leveldb实现分析-table文件格式" />
+<meta property="og:description" content="介绍 在leveldb的源码目录中，table文件的实现位于主目录下的table文件夹下，主要定义和实现了table文件和block的格式。
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20  table ├── block_builder.cc ├── block_builder.h ├── block.cc ├── block.h ├── filter_block.cc ├── filter_block.h ├── filter_block_test.cc ├── format.cc ├── format.h ├── iterator.cc ├── iterator_wrapper.h ├── merger.cc ├── merger.h ├── table_builder.cc ├── table.cc ├── table_test.cc ├── two_level_iterator.cc └── two_level_iterator.h   table文件的格式 table文件格式如下：
+1 2 3 4 5 6 7 8 9 10 11 12  &lt;beginning_of_file&gt; [data block 1] [data block 2] ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://iofun.me/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2017-08-30T22:56:37+00:00" />
+<meta property="article:modified_time" content="2017-08-30T22:56:37+00:00" />
+
+
+  <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="leveldb实现分析-table文件格式"/>
+<meta name="twitter:description" content="介绍 在leveldb的源码目录中，table文件的实现位于主目录下的table文件夹下，主要定义和实现了table文件和block的格式。
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20  table ├── block_builder.cc ├── block_builder.h ├── block.cc ├── block.h ├── filter_block.cc ├── filter_block.h ├── filter_block_test.cc ├── format.cc ├── format.h ├── iterator.cc ├── iterator_wrapper.h ├── merger.cc ├── merger.h ├── table_builder.cc ├── table.cc ├── table_test.cc ├── two_level_iterator.cc └── two_level_iterator.h   table文件的格式 table文件格式如下：
+1 2 3 4 5 6 7 8 9 10 11 12  &lt;beginning_of_file&gt; [data block 1] [data block 2] ."/>
+
+  
+  
+    
+  
+  
+  <link rel="stylesheet" href="https://iofun.me/css/styles.4c2b9aa1d874d6766f554b2d404e8fd62ab4761f51ee9b3f358d12e81e7fa43a1b4378db995bc1926bbe5ed98c060be5e7bd4f2470504cf94f22b4b3a74e62b6.css" integrity="sha512-TCuaodh01nZvVUstQE6P1iq0dh9R7ps/NY0S6B5/pDobQ3jbmVvBkmu&#43;XtmMBgvl571PJHBQTPlPIrSzp05itg=="> 
+
+  
+  
+  
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+  
+<link rel="icon" type="image/png" href="https://iofun.me/images/favicon.ico" />
+
+  
+  
+</head>
+
+<body class="max-width mx-auto px3 ltr">
+  <div class="content index py4">
+
+  <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;" aria-label="Top of Page"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+        <li><a href="/">Home</a></li>
+         
+        <li><a href="/posts">All posts</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li>
+          <a class="icon" href=" https://iofun.me/posts/cap%E7%90%86%E8%AE%BA/" aria-label="Previous">
+            <i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i>
+          </a>
+        </li>
+        
+        
+        <li>
+          <a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" aria-label="Top of Page">
+            <i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i>
+          </a>
+        </li>
+        <li>
+          <a class="icon" href="#" aria-label="Share">
+            <i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i>
+          </a>
+        </li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      
+      <ul>
+  
+  
+    
+  
+  
+  <li>
+    <a class="icon" href="http://www.facebook.com/sharer.php?u=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f" aria-label="Facebook">
+      <i class="fab fa-facebook " aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="https://twitter.com/share?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&text=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="Twitter">
+      <i class="fab fa-twitter " aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&title=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="Linkedin">
+      <i class="fab fa-linkedin " aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&is_video=false&description=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="Pinterest">
+      <i class="fab fa-pinterest " aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="mailto:?subject=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f&body=Check out this article: https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f" aria-label="Email">
+      <i class="fas fa-envelope " aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="https://getpocket.com/save?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&title=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="Pocket">
+      <i class="fab fa-get-pocket " aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="http://reddit.com/submit?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&title=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="reddit">
+      <i class="fab fa-reddit " aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="http://www.tumblr.com/share/link?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&name=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f&description=%e4%bb%8b%e7%bb%8d%20%e5%9c%a8leveldb%e7%9a%84%e6%ba%90%e7%a0%81%e7%9b%ae%e5%bd%95%e4%b8%ad%ef%bc%8ctable%e6%96%87%e4%bb%b6%e7%9a%84%e5%ae%9e%e7%8e%b0%e4%bd%8d%e4%ba%8e%e4%b8%bb%e7%9b%ae%e5%bd%95%e4%b8%8b%e7%9a%84table%e6%96%87%e4%bb%b6%e5%a4%b9%e4%b8%8b%ef%bc%8c%e4%b8%bb%e8%a6%81%e5%ae%9a%e4%b9%89%e5%92%8c%e5%ae%9e%e7%8e%b0%e4%ba%86table%e6%96%87%e4%bb%b6%e5%92%8cblock%e7%9a%84%e6%a0%bc%e5%bc%8f%e3%80%82%0a1%202%203%204%205%206%207%208%209%2010%2011%2012%2013%2014%2015%2016%2017%2018%2019%2020%20%20table%20%e2%94%9c%e2%94%80%e2%94%80%20block_builder.cc%20%e2%94%9c%e2%94%80%e2%94%80%20block_builder.h%20%e2%94%9c%e2%94%80%e2%94%80%20block.cc%20%e2%94%9c%e2%94%80%e2%94%80%20block.h%20%e2%94%9c%e2%94%80%e2%94%80%20filter_block.cc%20%e2%94%9c%e2%94%80%e2%94%80%20filter_block.h%20%e2%94%9c%e2%94%80%e2%94%80%20filter_block_test.cc%20%e2%94%9c%e2%94%80%e2%94%80%20format.cc%20%e2%94%9c%e2%94%80%e2%94%80%20format.h%20%e2%94%9c%e2%94%80%e2%94%80%20iterator.cc%20%e2%94%9c%e2%94%80%e2%94%80%20iterator_wrapper.h%20%e2%94%9c%e2%94%80%e2%94%80%20merger.cc%20%e2%94%9c%e2%94%80%e2%94%80%20merger.h%20%e2%94%9c%e2%94%80%e2%94%80%20table_builder.cc%20%e2%94%9c%e2%94%80%e2%94%80%20table.cc%20%e2%94%9c%e2%94%80%e2%94%80%20table_test.cc%20%e2%94%9c%e2%94%80%e2%94%80%20two_level_iterator.cc%20%e2%94%94%e2%94%80%e2%94%80%20two_level_iterator.h%20%20%20table%e6%96%87%e4%bb%b6%e7%9a%84%e6%a0%bc%e5%bc%8f%20table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f%e5%a6%82%e4%b8%8b%ef%bc%9a%0a1%202%203%204%205%206%207%208%209%2010%2011%2012%20%20%26lt%3bbeginning_of_file%26gt%3b%20%5bdata%20block%201%5d%20%5bdata%20block%202%5d%20." aria-label="Tumblr">
+      <i class="fab fa-tumblr " aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&t=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="Hacker News">
+      <i class="fab fa-hacker-news " aria-hidden="true"></i>
+    </a>
+  </li>
+</ul>
+
+    </div>
+    
+    <div id="toc">
+      <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#介绍">介绍</a></li>
+        <li><a href="#table文件的格式">table文件的格式</a></li>
+        <li><a href="#footer格式">Footer格式</a></li>
+        <li><a href="#block格式">block格式</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+    
+  </span>
+</div>
+
+
+  <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+      <h1 class="posttitle" itemprop="name headline">
+        leveldb实现分析-table文件格式
+      </h1>
+      <div class="meta">
+        
+        <div class="postdate">
+          
+          <time datetime="2017-08-30 22:56:37 &#43;0000 UTC" itemprop="datePublished">2017-08-30</time>
+          
+        </div>
+        
+        
+        
+        
+      </div>
+    </header>
+
+  
+    
+    <div class="content" itemprop="articleBody">
+      <h3 id="介绍">介绍</h3>
+<p>在leveldb的源码目录中，table文件的实现位于主目录下的table文件夹下，主要定义和实现了table文件和block的格式。</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">table
+├── block_builder.cc
+├── block_builder.h
+├── block.cc
+├── block.h
+├── filter_block.cc
+├── filter_block.h
+├── filter_block_test.cc
+├── format.cc
+├── format.h
+├── iterator.cc
+├── iterator_wrapper.h
+├── merger.cc
+├── merger.h
+├── table_builder.cc
+├── table.cc
+├── table_test.cc
+├── two_level_iterator.cc
+└── two_level_iterator.h
+
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="table文件的格式">table文件的格式</h3>
+<p>table文件格式如下：</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;beginning_of_file&gt;
+[data block 1]
+[data block 2]
+...
+[data block N]
+[meta block 1]
+...
+[meta block K]
+[metaindex block]
+[index block]
+[Footer]        (fixed size; starts at file_size - sizeof(Footer))
+&lt;end_of_file&gt;
+</code></pre></td></tr></table>
+</div>
+</div><p>其中data block 存储的是Key Value数据，meta block 存储的是Filter信息和其他一些元数据。
+metaindex block和index block分别记录了meta block和data block各个block的offset和length。</p>
+<p>以上所有block的格式都在block_builder.cc类定义的，block中数据按照key排序存放。</p>
+<p>Footer中存储了metaindex block和index的位置和长度。</p>
+<h3 id="footer格式">Footer格式</h3>
+<p>leveldb用BlockHandle来封装block的offset和length，在table/format.h中，BlockHandle组成如下：</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#6272a4">// BlockHandle is a pointer to the extent of a file that stores a data
+</span><span style="color:#6272a4">// block or a meta block.
+</span><span style="color:#6272a4"></span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">BlockHandle</span> {
+
+ ...
+
+ <span style="color:#ff79c6">private</span><span style="color:#ff79c6">:</span>
+  <span style="color:#8be9fd">uint64_t</span> offset_;
+  <span style="color:#8be9fd">uint64_t</span> size_;
+};
+</code></pre></td></tr></table>
+</div>
+</div><p>Footer中则存储了metaindex block和index的BlockHandle：</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#6272a4">// Footer encapsulates the fixed information stored at the tail
+</span><span style="color:#6272a4">// end of every table file.
+</span><span style="color:#6272a4"></span><span style="color:#ff79c6">class</span> <span style="color:#50fa7b">Footer</span> {
+ 
+ ...
+
+ <span style="color:#ff79c6">private</span><span style="color:#ff79c6">:</span>
+  BlockHandle metaindex_handle_;
+  BlockHandle index_handle_;
+};
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="block格式">block格式</h3>
+<p>block中存储了key value对，每一个key value队是一个entry。每个entry的格式如下：</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">     shared_bytes: varint32
+     unshared_bytes: varint32
+     value_length: varint32
+     key_delta: char[unshared_bytes]
+     value: char[value_length]
+</code></pre></td></tr></table>
+</div>
+</div><p>为了减少磁盘占用，block中的key存储采用了前缀压缩的方式，key信息记录的是与上一个key相差的字节信息。假设新插入如下3个key value对：</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">abc:1
+abcde:2
+a:3
+</code></pre></td></tr></table>
+</div>
+</div><p>对应的两个entry为</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">|shared_bytes|unshared_bytes|value_length|key_delta|value
+|0           |3             |1           |&#34;abc&#34;    |&#34;1&#34;
+|3           |2             |1           |&#34;de&#34;     |&#34;1&#34;
+|0           |1             |1           |&#34;a&#34;      |&#34;1&#34;
+</code></pre></td></tr></table>
+</div>
+</div><p>另外， 对于每N个key， 不适用前缀压缩。此时shared_bytes=0。N被记作restart point。restart point可以通过Options按需配置。</p>
+<p>在调用BlockBuilder::Finish()完成创建Block时，需要restart point数组记录在Block中：</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
+<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp">Slice BlockBuilder<span style="color:#ff79c6">::</span>Finish() {
+  <span style="color:#6272a4">// Append restart array
+</span><span style="color:#6272a4"></span>  <span style="color:#ff79c6">for</span> (size_t i <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">0</span>; i <span style="color:#ff79c6">&lt;</span> restarts_.size(); i<span style="color:#ff79c6">++</span>) {
+    PutFixed32(<span style="color:#ff79c6">&amp;</span>buffer_, restarts_[i]);
+  }
+  PutFixed32(<span style="color:#ff79c6">&amp;</span>buffer_, restarts_.size());
+  finished_ <span style="color:#ff79c6">=</span> <span style="color:#8be9fd;font-style:italic">true</span>;
+  <span style="color:#ff79c6">return</span> <span style="color:#50fa7b">Slice</span>(buffer_);
+}
+</code></pre></td></tr></table>
+</div>
+</div><!-- raw HTML omitted -->
+
+    </div>
+  </article>
+
+  
+  
+
+
+
+
+
+
+  <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/posts">All posts</a></li>
+        
+      </ul>
+    </div>
+
+    
+    <div id="toc-footer" style="display: none">
+      <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#介绍">介绍</a></li>
+        <li><a href="#table文件的格式">table文件的格式</a></li>
+        <li><a href="#footer格式">Footer格式</a></li>
+        <li><a href="#block格式">block格式</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+    </div>
+    
+
+    <div id="share-footer" style="display: none">
+      
+      <ul>
+  
+  
+    
+  
+  
+  <li>
+    <a class="icon" href="http://www.facebook.com/sharer.php?u=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f" aria-label="Facebook">
+      <i class="fab fa-facebook fa-lg" aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="https://twitter.com/share?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&text=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="Twitter">
+      <i class="fab fa-twitter fa-lg" aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="http://www.linkedin.com/shareArticle?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&title=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="Linkedin">
+      <i class="fab fa-linkedin fa-lg" aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&is_video=false&description=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="Pinterest">
+      <i class="fab fa-pinterest fa-lg" aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="mailto:?subject=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f&body=Check out this article: https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f" aria-label="Email">
+      <i class="fas fa-envelope fa-lg" aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="https://getpocket.com/save?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&title=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="Pocket">
+      <i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="http://reddit.com/submit?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&title=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="reddit">
+      <i class="fab fa-reddit fa-lg" aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="http://www.tumblr.com/share/link?url=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&name=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f&description=%e4%bb%8b%e7%bb%8d%20%e5%9c%a8leveldb%e7%9a%84%e6%ba%90%e7%a0%81%e7%9b%ae%e5%bd%95%e4%b8%ad%ef%bc%8ctable%e6%96%87%e4%bb%b6%e7%9a%84%e5%ae%9e%e7%8e%b0%e4%bd%8d%e4%ba%8e%e4%b8%bb%e7%9b%ae%e5%bd%95%e4%b8%8b%e7%9a%84table%e6%96%87%e4%bb%b6%e5%a4%b9%e4%b8%8b%ef%bc%8c%e4%b8%bb%e8%a6%81%e5%ae%9a%e4%b9%89%e5%92%8c%e5%ae%9e%e7%8e%b0%e4%ba%86table%e6%96%87%e4%bb%b6%e5%92%8cblock%e7%9a%84%e6%a0%bc%e5%bc%8f%e3%80%82%0a1%202%203%204%205%206%207%208%209%2010%2011%2012%2013%2014%2015%2016%2017%2018%2019%2020%20%20table%20%e2%94%9c%e2%94%80%e2%94%80%20block_builder.cc%20%e2%94%9c%e2%94%80%e2%94%80%20block_builder.h%20%e2%94%9c%e2%94%80%e2%94%80%20block.cc%20%e2%94%9c%e2%94%80%e2%94%80%20block.h%20%e2%94%9c%e2%94%80%e2%94%80%20filter_block.cc%20%e2%94%9c%e2%94%80%e2%94%80%20filter_block.h%20%e2%94%9c%e2%94%80%e2%94%80%20filter_block_test.cc%20%e2%94%9c%e2%94%80%e2%94%80%20format.cc%20%e2%94%9c%e2%94%80%e2%94%80%20format.h%20%e2%94%9c%e2%94%80%e2%94%80%20iterator.cc%20%e2%94%9c%e2%94%80%e2%94%80%20iterator_wrapper.h%20%e2%94%9c%e2%94%80%e2%94%80%20merger.cc%20%e2%94%9c%e2%94%80%e2%94%80%20merger.h%20%e2%94%9c%e2%94%80%e2%94%80%20table_builder.cc%20%e2%94%9c%e2%94%80%e2%94%80%20table.cc%20%e2%94%9c%e2%94%80%e2%94%80%20table_test.cc%20%e2%94%9c%e2%94%80%e2%94%80%20two_level_iterator.cc%20%e2%94%94%e2%94%80%e2%94%80%20two_level_iterator.h%20%20%20table%e6%96%87%e4%bb%b6%e7%9a%84%e6%a0%bc%e5%bc%8f%20table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f%e5%a6%82%e4%b8%8b%ef%bc%9a%0a1%202%203%204%205%206%207%208%209%2010%2011%2012%20%20%26lt%3bbeginning_of_file%26gt%3b%20%5bdata%20block%201%5d%20%5bdata%20block%202%5d%20." aria-label="Tumblr">
+      <i class="fab fa-tumblr fa-lg" aria-hidden="true"></i>
+    </a>
+  </li>
+  <li>
+    <a class="icon" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fiofun.me%2fposts%2fleveldb%25E5%25AE%259E%25E7%258E%25B0%25E5%2588%2586%25E6%259E%2590-table%25E6%2596%2587%25E4%25BB%25B6%25E6%25A0%25BC%25E5%25BC%258F%2f&t=leveldb%e5%ae%9e%e7%8e%b0%e5%88%86%e6%9e%90-table%e6%96%87%e4%bb%b6%e6%a0%bc%e5%bc%8f" aria-label="Hacker News">
+      <i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i>
+    </a>
+  </li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+      
+        <a id="menu-toggle" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;" aria-label="Menu">
+          <i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+        <a id="toc-toggle" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;" aria-label="TOC">
+          <i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share-toggle" class="icon" href="#" onclick="$('#share-footer').toggle();return false;" aria-label="Share">
+          <i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" aria-label="Top of Page">
+          <i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+
+  <footer id="footer">
+  <div class="footer-left">
+    Copyright  &copy; 2022  iofun 
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+        <li><a href="/">Home</a></li>
+         
+        <li><a href="/posts">All posts</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+
+  </div>
+</body>
+
+<link rel="stylesheet" href=/lib/font-awesome/css/all.min.css>
+<script src=/lib/jquery/jquery.min.js></script>
+<script src=/js/main.js></script>
+
+<script src=/js/code-copy.js></script>
+
+
+
+  
+
+
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    },
+    svg: {
+      fontCache: 'global'
+    }
+  };
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+
+</html>

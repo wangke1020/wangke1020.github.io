@@ -1,10 +1,19 @@
 <!doctype html><html lang=en-us>
 <head>
+<link rel=preload href=/lib/font-awesome/webfonts/fa-brands-400.woff2 as=font type=font/woff2 crossorigin=anonymous>
+<link rel=preload href=/lib/font-awesome/webfonts/fa-regular-400.woff2 as=font type=font/woff2 crossorigin=anonymous>
+<link rel=preload href=/lib/font-awesome/webfonts/fa-solid-900.woff2 as=font type=font/woff2 crossorigin=anonymous>
+<link rel=preload href=/lib/JetBrainsMono/web/woff2/JetBrainsMono-Regular.woff2 as=font type=font/woff2 crossorigin=anonymous>
+<script type=text/javascript src=https://latest.cactus.chat/cactus.js></script>
+<link rel=stylesheet href=https://latest.cactus.chat/style.css type=text/css>
 <meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<title> Folly SharedMutex | iofun</title>
+<link rel=canonical href=https://iofun.me/posts/folly-sharedmutex/>
 <meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=robots content="noodp">
-<meta http-equiv=x-ua-compatible content="IE=edge, chrome=1">
-<title>Folly SharedMutex - iofun</title><meta name=Description content><meta property="og:title" content="Folly SharedMutex">
+<meta name=robots content="all,follow">
+<meta name=googlebot content="index,follow,snippet,archive">
+<meta property="og:title" content="Folly SharedMutex">
 <meta property="og:description" content="TODO ">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://iofun.me/posts/folly-sharedmutex/"><meta property="article:section" content="posts">
@@ -13,58 +22,99 @@
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Folly SharedMutex">
 <meta name=twitter:description content="TODO ">
-<meta name=application-name content="iofun">
-<meta name=apple-mobile-web-app-title content="iofun"><link rel="shortcut icon" type=image/x-icon href=/favicon.ico>
-<link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png>
-<link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=manifest href=/site.webmanifest><link rel=canonical href=https://iofun.me/posts/folly-sharedmutex/><link rel=prev href=https://iofun.me/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/><link rel=stylesheet href=/lib/normalize/normalize.min.css><link rel=stylesheet href=/css/style.min.css><link rel=stylesheet href=/lib/fontawesome-free/all.min.css><link rel=stylesheet href=/lib/animate/animate.min.css><script type=application/ld+json>{"@context":"http://schema.org","@type":"BlogPosting","headline":"Folly SharedMutex","inLanguage":"en-us","mainEntityOfPage":{"@type":"WebPage","@id":"https:\/\/iofun.me\/posts\/folly-sharedmutex\/"},"genre":"posts","wordcount":1,"url":"https:\/\/iofun.me\/posts\/folly-sharedmutex\/","datePublished":"2022-02-12T20:53:09+08:00","dateModified":"2022-02-12T20:53:09+08:00","publisher":{"@type":"Organization","name":"Author"},"author":{"@type":"Person","name":"Author"},"description":""}</script></head>
-<body header-desktop header-mobile><script type=text/javascript>(window.localStorage&&localStorage.getItem('theme')?localStorage.getItem('theme')==='dark':''==='auto'?window.matchMedia('(prefers-color-scheme: dark)').matches:''==='dark')&&document.body.setAttribute('theme','dark')</script>
-<div id=mask></div><div class=wrapper><header class=desktop id=header-desktop>
-<div class=header-wrapper>
-<div class=header-title>
-<a href=/ title=iofun>iofun</a>
-</div>
-<div class=menu>
-<div class=menu-inner><a class=menu-item href=/> Home </a><a class=menu-item href=/posts> All posts </a><span class="menu-item delimiter"></span><a href=javascript:void(0); class="menu-item theme-switch" title="Switch Theme">
-<i class="fas fa-adjust fa-fw"></i>
+<link rel=stylesheet href=https://iofun.me/css/styles.4c2b9aa1d874d6766f554b2d404e8fd62ab4761f51ee9b3f358d12e81e7fa43a1b4378db995bc1926bbe5ed98c060be5e7bd4f2470504cf94f22b4b3a74e62b6.css integrity="sha512-TCuaodh01nZvVUstQE6P1iq0dh9R7ps/NY0S6B5/pDobQ3jbmVvBkmu+XtmMBgvl571PJHBQTPlPIrSzp05itg=="><!--[if lt IE 9]><script src=https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js></script>
+<script src=https://oss.maxcdn.com/respond/1.4.2/respond.min.js></script><![endif]-->
+<link rel=icon type=image/png href=https://iofun.me/images/favicon.ico>
+</head>
+<body class="max-width mx-auto px3 ltr">
+<div class="content index py4">
+<div id=header-post>
+<a id=menu-icon href=#><i class="fas fa-bars fa-lg"></i></a>
+<a id=menu-icon-tablet href=#><i class="fas fa-bars fa-lg"></i></a>
+<a id=top-icon-tablet href=# onclick="$('html, body').animate({scrollTop:0},'fast')" style=display:none aria-label="Top of Page"><i class="fas fa-chevron-up fa-lg"></i></a>
+<span id=menu>
+<span id=nav>
+<ul>
+<li><a href=/>Home</a></li>
+<li><a href=/posts>All posts</a></li>
+</ul>
+</span>
+<br>
+<span id=actions>
+<ul>
+<li>
+<a class=icon href=https://iofun.me/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/ aria-label=Previous>
+<i class="fas fa-chevron-left" aria-hidden=true onmouseover="$('#i-prev').toggle()" onmouseout="$('#i-prev').toggle()"></i>
 </a>
+</li>
+<li>
+<a class=icon href=# onclick="$('html, body').animate({scrollTop:0},'fast')" aria-label="Top of Page">
+<i class="fas fa-chevron-up" aria-hidden=true onmouseover="$('#i-top').toggle()" onmouseout="$('#i-top').toggle()"></i>
+</a>
+</li>
+<li>
+<a class=icon href=# aria-label=Share>
+<i class="fas fa-share-alt" aria-hidden=true onmouseover="$('#i-share').toggle()" onmouseout="$('#i-share').toggle()" onclick="return $('#share').toggle(),!1"></i>
+</a>
+</li>
+</ul>
+<span id=i-prev class=info style=display:none>Previous post</span>
+<span id=i-next class=info style=display:none>Next post</span>
+<span id=i-top class=info style=display:none>Back to top</span>
+<span id=i-share class=info style=display:none>Share post</span>
+</span>
+<br>
+<div id=share style=display:none>
+<ul>
+<li>
+<a class=icon href="http://www.facebook.com/sharer.php?u=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f" aria-label=Facebook>
+<i class="fab fa-facebook" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="https://twitter.com/share?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&text=Folly%20SharedMutex" aria-label=Twitter>
+<i class="fab fa-twitter" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="http://www.linkedin.com/shareArticle?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&title=Folly%20SharedMutex" aria-label=Linkedin>
+<i class="fab fa-linkedin" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="https://pinterest.com/pin/create/bookmarklet/?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&is_video=false&description=Folly%20SharedMutex" aria-label=Pinterest>
+<i class="fab fa-pinterest" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="mailto:?subject=Folly%20SharedMutex&body=Check out this article: https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f" aria-label=Email>
+<i class="fas fa-envelope" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="https://getpocket.com/save?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&title=Folly%20SharedMutex" aria-label=Pocket>
+<i class="fab fa-get-pocket" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="http://reddit.com/submit?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&title=Folly%20SharedMutex" aria-label=reddit>
+<i class="fab fa-reddit" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="http://www.tumblr.com/share/link?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&name=Folly%20SharedMutex&description=TODO%20" aria-label=Tumblr>
+<i class="fab fa-tumblr" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&t=Folly%20SharedMutex" aria-label="Hacker News">
+<i class="fab fa-hacker-news" aria-hidden=true></i>
+</a>
+</li>
+</ul>
 </div>
-</div>
-</div>
-</header><header class=mobile id=header-mobile>
-<div class=header-container>
-<div class=header-wrapper>
-<div class=header-title>
-<a href=/ title=iofun>iofun</a>
-</div>
-<div class=menu-toggle id=menu-toggle-mobile>
-<span></span><span></span><span></span>
-</div>
-</div>
-<div class=menu id=menu-mobile><a class=menu-item href=/ title>Home</a><a class=menu-item href=/posts title>All posts</a><a href=javascript:void(0); class="menu-item theme-switch" title="Switch Theme">
-<i class="fas fa-adjust fa-fw"></i>
-</a></div>
-</div>
-</header>
-<div class="search-dropdown desktop">
-<div id=search-dropdown-desktop></div>
-</div>
-<div class="search-dropdown mobile">
-<div id=search-dropdown-mobile></div>
-</div>
-<main class=main>
-<div class=container><div class=toc id=toc-auto>
-<h2 class=toc-title>Contents</h2>
-<div class=toc-content id=toc-content-auto></div>
-</div><article class="page single"><h1 class="single-title animated flipInX">Folly SharedMutex</h1><div class=post-meta>
-<div class=post-meta-line><span class=post-author><a href=/ title=Author rel=author class=author><i class="fas fa-user-circle fa-fw"></i>Author</a></span></div>
-<div class=post-meta-line><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime=2022-02-12>2022-02-12</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;One word&nbsp;
-<i class="far fa-clock fa-fw"></i>&nbsp;One minute&nbsp;</div>
-</div><div class="details toc" id=toc-static kept>
-<div class="details-summary toc-title">
-<span>Contents</span>
-<span><i class="details-icon fas fa-angle-right"></i></span>
-</div>
-<div class="details-content toc-content" id=toc-content-static><nav id=TableOfContents>
+<div id=toc>
+<nav id=TableOfContents>
 <ul>
 <li>
 <ul>
@@ -72,41 +122,124 @@
 </ul>
 </li>
 </ul>
-</nav></div>
-</div><div class=content id=content><h3 id=todo>TODO</h3>
-</div><div class=post-footer id=post-footer>
-<div class=post-info>
-<div class=post-info-line>
-<div class=post-info-mod>
-<span>Updated on 2022-02-12</span>
+</nav>
 </div>
-<div class=post-info-license></div>
+</span>
 </div>
-<div class=post-info-line>
-<div class=post-info-md></div>
-<div class=post-info-share>
-<span></span>
+<article class=post itemscope itemtype=http://schema.org/BlogPosting>
+<header>
+<h1 class=posttitle itemprop="name headline">
+Folly SharedMutex
+</h1>
+<div class=meta>
+<div class=postdate>
+<time datetime="2022-02-12 20:53:09 +0800 +0800" itemprop=datePublished>2022-02-12</time>
 </div>
 </div>
+</header>
+<div class=content itemprop=articleBody>
+<h3 id=todo>TODO</h3>
 </div>
-<div class=post-info-more>
-<section class=post-tags></section>
-<section>
-<span><a href=javascript:void(0); onclick=window.history.back()>Back</a></span>&nbsp;|&nbsp;<span><a href=/>Home</a></span>
-</section>
+</article>
+<div id=footer-post-container>
+<div id=footer-post>
+<div id=nav-footer style=display:none>
+<ul>
+<li><a href=/>Home</a></li>
+<li><a href=/posts>All posts</a></li>
+</ul>
 </div>
-<div class=post-nav><a href=/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/ class=prev rel=prev title=leveldb实现分析-table文件格式><i class="fas fa-angle-left fa-fw"></i>leveldb实现分析-table文件格式</a></div>
+<div id=toc-footer style=display:none>
+<nav id=TableOfContents>
+<ul>
+<li>
+<ul>
+<li><a href=#todo>TODO</a></li>
+</ul>
+</li>
+</ul>
+</nav>
 </div>
-</article></div>
-</main><footer class=footer>
-<div class=footer-container><div class=footer-line>Powered by <a href=https://gohugo.io/ target=_blank rel="noopener noreffer" title="Hugo 0.92.2">Hugo</a> | Theme - <a href=https://github.com/dillonzq/LoveIt target=_blank rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
-</div><div class=footer-line><i class="far fa-copyright fa-fw"></i><span itemprop=copyrightYear>2022</span><span class=author itemprop=copyrightHolder>&nbsp;<a href=/ target=_blank></a></span></div>
-</div>
-</footer></div>
-<div id=fixed-buttons><a href=# id=back-to-top class=fixed-button title="Back to Top">
-<i class="fas fa-arrow-up fa-fw"></i>
-</a><a href=# id=view-comments class=fixed-button title="View Comments">
-<i class="fas fa-comment fa-fw"></i>
+<div id=share-footer style=display:none>
+<ul>
+<li>
+<a class=icon href="http://www.facebook.com/sharer.php?u=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f" aria-label=Facebook>
+<i class="fab fa-facebook fa-lg" aria-hidden=true></i>
 </a>
-</div><script type=text/javascript src=/lib/smooth-scroll/smooth-scroll.min.js></script><script type=text/javascript src=/lib/lazysizes/lazysizes.min.js></script><script type=text/javascript src=/lib/clipboard/clipboard.min.js></script><script type=text/javascript>window.config={code:{copyTitle:"Copy to clipboard",maxShownLines:10},comment:{}}</script><script type=text/javascript src=/js/theme.min.js></script></body>
+</li>
+<li>
+<a class=icon href="https://twitter.com/share?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&text=Folly%20SharedMutex" aria-label=Twitter>
+<i class="fab fa-twitter fa-lg" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="http://www.linkedin.com/shareArticle?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&title=Folly%20SharedMutex" aria-label=Linkedin>
+<i class="fab fa-linkedin fa-lg" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="https://pinterest.com/pin/create/bookmarklet/?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&is_video=false&description=Folly%20SharedMutex" aria-label=Pinterest>
+<i class="fab fa-pinterest fa-lg" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="mailto:?subject=Folly%20SharedMutex&body=Check out this article: https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f" aria-label=Email>
+<i class="fas fa-envelope fa-lg" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="https://getpocket.com/save?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&title=Folly%20SharedMutex" aria-label=Pocket>
+<i class="fab fa-get-pocket fa-lg" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="http://reddit.com/submit?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&title=Folly%20SharedMutex" aria-label=reddit>
+<i class="fab fa-reddit fa-lg" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="http://www.tumblr.com/share/link?url=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&name=Folly%20SharedMutex&description=TODO%20" aria-label=Tumblr>
+<i class="fab fa-tumblr fa-lg" aria-hidden=true></i>
+</a>
+</li>
+<li>
+<a class=icon href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fiofun.me%2fposts%2ffolly-sharedmutex%2f&t=Folly%20SharedMutex" aria-label="Hacker News">
+<i class="fab fa-hacker-news fa-lg" aria-hidden=true></i>
+</a>
+</li>
+</ul>
+</div>
+<div id=actions-footer>
+<a id=menu-toggle class=icon href=# onclick="return $('#nav-footer').toggle(),!1" aria-label=Menu>
+<i class="fas fa-bars fa-lg" aria-hidden=true></i> Menu</a>
+<a id=toc-toggle class=icon href=# onclick="return $('#toc-footer').toggle(),!1" aria-label=TOC>
+<i class="fas fa-list fa-lg" aria-hidden=true></i> TOC</a>
+<a id=share-toggle class=icon href=# onclick="return $('#share-footer').toggle(),!1" aria-label=Share>
+<i class="fas fa-share-alt fa-lg" aria-hidden=true></i> share</a>
+<a id=top style=display:none class=icon href=# onclick="$('html, body').animate({scrollTop:0},'fast')" aria-label="Top of Page">
+<i class="fas fa-chevron-up fa-lg" aria-hidden=true></i> Top</a>
+</div>
+</div>
+</div>
+<footer id=footer>
+<div class=footer-left>
+Copyright &copy; 2022 iofun
+</div>
+<div class=footer-right>
+<nav>
+<ul>
+<li><a href=/>Home</a></li>
+<li><a href=/posts>All posts</a></li>
+</ul>
+</nav>
+</div>
+</footer>
+</div>
+</body>
+<link rel=stylesheet href=/lib/font-awesome/css/all.min.css>
+<script src=/lib/jquery/jquery.min.js></script>
+<script src=/js/main.js></script>
+<script src=/js/code-copy.js></script>
+<script>MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']]},svg:{fontCache:'global'}}</script>
+<script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
 </html>

@@ -2,17 +2,26 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on iofun</title>
-    <link>https://iofun.me/posts/</link>
+    <link>https://wangke1020.github.io/posts/</link>
     <description>Recent content in Posts on iofun</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 30 Aug 2017 22:56:37 +0000</lastBuildDate><atom:link href="https://iofun.me/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 12 Feb 2022 20:53:09 +0800</lastBuildDate><atom:link href="https://wangke1020.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Folly SharedMutex</title>
+      <link>https://wangke1020.github.io/posts/folly-sharedmutex/</link>
+      <pubDate>Sat, 12 Feb 2022 20:53:09 +0800</pubDate>
+      
+      <guid>https://wangke1020.github.io/posts/folly-sharedmutex/</guid>
+      <description>TODO </description>
+    </item>
+    
     <item>
       <title>leveldb实现分析-table文件格式</title>
-      <link>https://iofun.me/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/</link>
+      <link>https://wangke1020.github.io/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/</link>
       <pubDate>Wed, 30 Aug 2017 22:56:37 +0000</pubDate>
       
-      <guid>https://iofun.me/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/</guid>
+      <guid>https://wangke1020.github.io/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/</guid>
       <description>介绍 在leveldb的源码目录中，table文件的实现位于主目录下的table文件夹下，主要定义和实现了table文件和block的格式。
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20  table ├── block_builder.cc ├── block_builder.h ├── block.cc ├── block.h ├── filter_block.cc ├── filter_block.h ├── filter_block_test.cc ├── format.cc ├── format.h ├── iterator.cc ├── iterator_wrapper.h ├── merger.cc ├── merger.h ├── table_builder.cc ├── table.cc ├── table_test.cc ├── two_level_iterator.cc └── two_level_iterator.h   table文件的格式 table文件格式如下：
 1 2 3 4 5 6 7 8 9 10 11 12  &amp;lt;beginning_of_file&amp;gt; [data block 1] [data block 2] .</description>
@@ -20,10 +29,10 @@
     
     <item>
       <title>CAP理论</title>
-      <link>https://iofun.me/posts/cap%E7%90%86%E8%AE%BA/</link>
+      <link>https://wangke1020.github.io/posts/cap%E7%90%86%E8%AE%BA/</link>
       <pubDate>Fri, 09 Jun 2017 23:47:19 +0000</pubDate>
       
-      <guid>https://iofun.me/posts/cap%E7%90%86%E8%AE%BA/</guid>
+      <guid>https://wangke1020.github.io/posts/cap%E7%90%86%E8%AE%BA/</guid>
       <description>介绍 CAP理论指对于一个分布式计算系统来说，不可能同时满足以下三点：
   一致性（Consistence)
 一致性指的是所有节点总是访问到最新的数据，这里的一致性指的是强一致性，即!Linearizability.
@@ -49,10 +58,10 @@ MYSQL则始终提供强一致性（C），在某些情况下选择性的放弃�
     
     <item>
       <title>Gossip Protocal</title>
-      <link>https://iofun.me/posts/gossip-protocal/</link>
+      <link>https://wangke1020.github.io/posts/gossip-protocal/</link>
       <pubDate>Wed, 26 Apr 2017 21:23:51 +0000</pubDate>
       
-      <guid>https://iofun.me/posts/gossip-protocal/</guid>
+      <guid>https://wangke1020.github.io/posts/gossip-protocal/</guid>
       <description>什么是Gossip协议 Gossip Protocol利用一种随机的方式将信息散播到整个网络中。正如Gossip本身的含义一样，Gossip协议的工作流程即类似于绯闻的传播，或者流行病的传播。
 Epidemiology 流行病传染最基本的模型仅作如下几个假设：
  (n+1)个人均匀的分布在一起 每一对人群之间的传染概率是$\beta$，显然$0&amp;lt;\beta&amp;lt;1$. 任意时刻，某个人要么处于infected的状态要么处于uninfected的状态. 一旦某个人从uninfected状态转变成为infected状态，其一直停留在infected状态。  有了以上假设，我们可以进一步分析流行病的传染情况。我们记t时刻处于infected状态的人数为$y_t$，处于uninfected状态的人为$x_t$，那么初始状态 $y_0=1$, $x_0=n$，并且在任何时候$x_t+y_t=n+1$.
@@ -77,10 +86,10 @@ Gossip节点的通信方式 根据原论文，两个节点（A、B）之间存�
     
     <item>
       <title>pipe and fork</title>
-      <link>https://iofun.me/posts/fork-and-pipe/</link>
+      <link>https://wangke1020.github.io/posts/fork-and-pipe/</link>
       <pubDate>Mon, 19 Sep 2016 22:51:09 +0000</pubDate>
       
-      <guid>https://iofun.me/posts/fork-and-pipe/</guid>
+      <guid>https://wangke1020.github.io/posts/fork-and-pipe/</guid>
       <description>Pipe Introduction Every program we run on the command line automatically has three data streams connected to it.
 STDIN (0) - Standard input (data fed into the program) STDOUT (1) - Standard output (data printed by the program, defaults to the terminal) STDERR (2) - Standard error (for error messages, also defaults to the terminal)
 Create a simple pipe in C To create a simple pipe with C, we make use of the pipe() system call.</description>

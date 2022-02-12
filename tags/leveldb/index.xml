@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>leveldb on iofun</title>
-    <link>https://iofun.me/tags/leveldb/</link>
+    <link>https://wangke1020.github.io/tags/leveldb/</link>
     <description>Recent content in leveldb on iofun</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 30 Aug 2017 22:56:37 +0000</lastBuildDate><atom:link href="https://iofun.me/tags/leveldb/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 30 Aug 2017 22:56:37 +0000</lastBuildDate><atom:link href="https://wangke1020.github.io/tags/leveldb/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>leveldb实现分析-table文件格式</title>
-      <link>https://iofun.me/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/</link>
+      <link>https://wangke1020.github.io/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/</link>
       <pubDate>Wed, 30 Aug 2017 22:56:37 +0000</pubDate>
       
-      <guid>https://iofun.me/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/</guid>
+      <guid>https://wangke1020.github.io/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/</guid>
       <description>介绍 在leveldb的源码目录中，table文件的实现位于主目录下的table文件夹下，主要定义和实现了table文件和block的格式。
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20  table ├── block_builder.cc ├── block_builder.h ├── block.cc ├── block.h ├── filter_block.cc ├── filter_block.h ├── filter_block_test.cc ├── format.cc ├── format.h ├── iterator.cc ├── iterator_wrapper.h ├── merger.cc ├── merger.h ├── table_builder.cc ├── table.cc ├── table_test.cc ├── two_level_iterator.cc └── two_level_iterator.h   table文件的格式 table文件格式如下：
 1 2 3 4 5 6 7 8 9 10 11 12  &amp;lt;beginning_of_file&amp;gt; [data block 1] [data block 2] .</description>

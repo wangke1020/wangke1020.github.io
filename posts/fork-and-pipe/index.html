@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>pipe and fork - iofun</title><meta name="Description" content=""><meta property="og:title" content="pipe and fork" />
+<meta property="og:description" content="Pipe Introduction Every program we run on the command line automatically has three data streams connected to it.
+STDIN (0) - Standard input (data fed into the program) STDOUT (1) - Standard output (data printed by the program, defaults to the terminal) STDERR (2) - Standard error (for error messages, also defaults to the terminal)
+Create a simple pipe in C To create a simple pipe with C, we make use of the pipe() system call." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://iofun.me/posts/fork-and-pipe/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-09-19T22:51:09+00:00" />
+<meta property="article:modified_time" content="2016-09-19T22:51:09+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="pipe and fork"/>
+<meta name="twitter:description" content="Pipe Introduction Every program we run on the command line automatically has three data streams connected to it.
+STDIN (0) - Standard input (data fed into the program) STDOUT (1) - Standard output (data printed by the program, defaults to the terminal) STDERR (2) - Standard error (for error messages, also defaults to the terminal)
+Create a simple pipe in C To create a simple pipe with C, we make use of the pipe() system call."/>
+<meta name="application-name" content="iofun">
+<meta name="apple-mobile-web-app-title" content="iofun"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://iofun.me/posts/fork-and-pipe/" /><link rel="next" href="https://iofun.me/posts/gossip-protocal/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "pipe and fork",
+        "inLanguage": "en-us",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/iofun.me\/posts\/fork-and-pipe\/"
+        },"genre": "posts","wordcount":  576 ,
+        "url": "https:\/\/iofun.me\/posts\/fork-and-pipe\/","datePublished": "2016-09-19T22:51:09+00:00","dateModified": "2016-09-19T22:51:09+00:00","publisher": {
+            "@type": "Organization",
+            "name": "Author"},"author": {
+                "@type": "Person",
+                "name": "Author"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="" header-mobile=""><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : '' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="iofun">iofun</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/"> Home </a><a class="menu-item" href="/posts"> All posts </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="iofun">iofun</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><a class="menu-item" href="/" title="">Home</a><a class="menu-item" href="/posts" title="">All posts</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">pipe and fork</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>Author</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2016-09-19">2016-09-19</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;576 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;3 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#pipe-introduction">Pipe Introduction</a></li>
+    <li><a href="#create-a-simple-pipe-in-c">Create a simple pipe in C</a>
+      <ul>
+        <li><a href="#use-fork-and-pipe">Use fork and pipe</a></li>
+        <li><a href="#reference">Reference:</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="pipe-introduction">Pipe Introduction</h2>
+<p>Every program we run on the command line automatically has three data streams connected to it.</p>
+<p>STDIN (0) - Standard input (data fed into the program)
+STDOUT (1) - Standard output (data printed by the program, defaults to the terminal)
+STDERR (2) - Standard error (for error messages, also defaults to the terminal)</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/img/pipe_and_fork/streams.png"
+        data-srcset="/img/pipe_and_fork/streams.png, /img/pipe_and_fork/streams.png 1.5x, /img/pipe_and_fork/streams.png 2x"
+        data-sizes="auto"
+        alt="/img/pipe_and_fork/streams.png"
+        title="streams" /></p>
+<h2 id="create-a-simple-pipe-in-c">Create a simple pipe in C</h2>
+<p>To create a simple pipe with C, we make use of the pipe() system call. It takes a single argument, which is an array of two integers, and if successful, the array will contain two new file descriptors to be used for the pipeline. After creating a pipe, the process typically spawns a new process (remember the child inherits open file descriptors).</p>
+<blockquote>
+<p>SYSTEM CALL: pipe();</p>
+</blockquote>
+<p>PROTOTYPE: int pipe( int fd[2] );                                          <br>
+RETURNS: 0 on success                                                    <br>
+-1 on error: errno = EMFILE (no free descriptors)               <br>
+EMFILE (system file table is full)         <br>
+EFAULT (fd array is not valid)</p>
+<p>NOTES: fd[0] is set up for reading, fd[1] is set up for writing</p>
+<p>code example:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="n">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="kt">int</span>     <span class="n">fd</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+    <span class="n">pid_t</span>   <span class="n">childpid</span><span class="p">;</span>
+
+    <span class="n">pipe</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+    <span class="p">.</span>
+    <span class="p">.</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>After pipe is invoked, fd[0] and fd[1] are connected as following picture.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/img/pipe_and_fork/pipe.png"
+        data-srcset="/img/pipe_and_fork/pipe.png, /img/pipe_and_fork/pipe.png 1.5x, /img/pipe_and_fork/pipe.png 2x"
+        data-sizes="auto"
+        alt="/img/pipe_and_fork/pipe.png"
+        title="pipe" /></p>
+<!-- raw HTML omitted -->
+<h3 id="use-fork-and-pipe">Use fork and pipe</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="n">main</span><span class="p">()</span>
+<span class="p">{</span>
+        <span class="kt">int</span>     <span class="n">fd</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+        <span class="n">pid_t</span>   <span class="n">childpid</span><span class="p">;</span>
+
+        <span class="n">pipe</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+
+        <span class="k">if</span><span class="p">((</span><span class="n">childpid</span> <span class="o">=</span> <span class="n">fork</span><span class="p">())</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">{</span>
+                <span class="n">perror</span><span class="p">(</span><span class="s">&#34;fork&#34;</span><span class="p">);</span>
+                <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">childpid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">{</span>
+                <span class="cm">/* Child process closes up input side of pipe */</span>
+                <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+        <span class="p">}</span>
+        <span class="k">else</span>
+        <span class="p">{</span>
+                <span class="cm">/* Parent process closes up output side of pipe */</span>
+                <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+        <span class="p">}</span>
+        <span class="p">.</span>
+        <span class="p">.</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>After fork is called, child process is created and it also have the two file descriptors.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/img/pipe_and_fork/pipe_and_fork.png"
+        data-srcset="/img/pipe_and_fork/pipe_and_fork.png, /img/pipe_and_fork/pipe_and_fork.png 1.5x, /img/pipe_and_fork/pipe_and_fork.png 2x"
+        data-sizes="auto"
+        alt="/img/pipe_and_fork/pipe_and_fork.png"
+        title="pipe_and_fork" /></p>
+<p>If the parent wants to receive data from the child, it should close fd1, and the child should close fd0. If the parent wants to send data to the child, it should close fd0, and the child should close fd1. Since descriptors are shared between the parent and child, we should always be sure to close the end of pipe we aren&rsquo;t concerned with. On a technical note, the EOF will never be returned if the unnecessary ends of the pipe are not explicitly closed.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="/img/pipe_and_fork/after_close_unused_ends.png"
+        data-srcset="/img/pipe_and_fork/after_close_unused_ends.png, /img/pipe_and_fork/after_close_unused_ends.png 1.5x, /img/pipe_and_fork/after_close_unused_ends.png 2x"
+        data-sizes="auto"
+        alt="/img/pipe_and_fork/after_close_unused_ends.png"
+        title="pipe_and_fork" /></p>
+<p>Once the pipeline has been established, the file descriptors may be treated like descriptors to normal files.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="cm">/*****************************************************************************
+</span><span class="cm"> Excerpt from &#34;Linux Programmer&#39;s Guide - Chapter 6&#34;
+</span><span class="cm"> (C)opyright 1994-1995, Scott Burkett
+</span><span class="cm"> *****************************************************************************
+</span><span class="cm"> MODULE: pipe.c
+</span><span class="cm"> *****************************************************************************/</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+        <span class="kt">int</span>     <span class="n">fd</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">nbytes</span><span class="p">;</span>
+        <span class="n">pid_t</span>   <span class="n">childpid</span><span class="p">;</span>
+        <span class="kt">char</span>    <span class="n">string</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&#34;Hello, world!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+        <span class="kt">char</span>    <span class="n">readbuffer</span><span class="p">[</span><span class="mi">80</span><span class="p">];</span>
+
+        <span class="n">pipe</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+
+        <span class="k">if</span><span class="p">((</span><span class="n">childpid</span> <span class="o">=</span> <span class="n">fork</span><span class="p">())</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">{</span>
+                <span class="n">perror</span><span class="p">(</span><span class="s">&#34;fork&#34;</span><span class="p">);</span>
+                <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">childpid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">{</span>
+                <span class="cm">/* Child process closes up input side of pipe */</span>
+                <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+
+                <span class="cm">/* Send &#34;string&#34; through the output side of pipe */</span>
+                <span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">string</span><span class="p">,</span> <span class="p">(</span><span class="n">strlen</span><span class="p">(</span><span class="n">string</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">));</span>
+                <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span>
+        <span class="p">{</span>
+                <span class="cm">/* Parent process closes up output side of pipe */</span>
+                <span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+
+                <span class="cm">/* Read in a string from the pipe */</span>
+                <span class="n">nbytes</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">readbuffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">readbuffer</span><span class="p">));</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Received string: %s&#34;</span><span class="p">,</span> <span class="n">readbuffer</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="reference">Reference:</h3>
+<ul>
+<li><a href="http://tldp.org/LDP/lpg/node11.html" target="_blank" rel="noopener noreffer">http://tldp.org/LDP/lpg/node11.html</a></li>
+<li><a href="https://upsilon.cc/~zack/teaching/1314/progsyst/cours-03-pipe.pdf" target="_blank" rel="noopener noreffer">https://upsilon.cc/~zack/teaching/1314/progsyst/cours-03-pipe.pdf</a></li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2016-09-19</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav">
+            <a href="/posts/gossip-protocal/" class="next" rel="next" title="Gossip Protocal">Gossip Protocal<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+</article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">Powered by <a href="https://gohugo.io/" target="_blank" rel="noopener noreffer" title="Hugo 0.92.2">Hugo</a> | Theme - <a href="https://github.com/dillonzq/LoveIt" target="_blank" rel="noopener noreffer" title="LoveIt 0.2.10"><i class="far fa-kiss-wink-heart fa-fw"></i> LoveIt</a>
+                </div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank"></a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":10},"comment":{}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

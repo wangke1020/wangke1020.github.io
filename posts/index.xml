@@ -1,0 +1,85 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>All Posts - iofun</title>
+        <link>https://iofun.me/posts/</link>
+        <description>All Posts | iofun</description>
+        <generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 12 Feb 2022 20:53:09 &#43;0800</lastBuildDate><atom:link href="https://iofun.me/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Folly SharedMutex</title>
+    <link>https://iofun.me/posts/folly-sharedmutex/</link>
+    <pubDate>Sat, 12 Feb 2022 20:53:09 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>https://iofun.me/posts/folly-sharedmutex/</guid>
+    <description><![CDATA[TODO ]]></description>
+</item><item>
+    <title>leveldb实现分析-table文件格式</title>
+    <link>https://iofun.me/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/</link>
+    <pubDate>Wed, 30 Aug 2017 22:56:37 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>https://iofun.me/posts/leveldb%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90-table%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/</guid>
+    <description><![CDATA[介绍 在leveldb的源码目录中，table文件的实现位于主目录下的table文件夹下，主要定义和实现了table文件和block的格式。
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20  table ├── block_builder.cc ├── block_builder.h ├── block.cc ├── block.h ├── filter_block.cc ├── filter_block.h ├── filter_block_test.cc ├── format.cc ├── format.h ├── iterator.cc ├── iterator_wrapper.h ├── merger.cc ├── merger.h ├── table_builder.cc ├── table.cc ├── table_test.cc ├── two_level_iterator.cc └── two_level_iterator.h   table文件的格式 table文件格式如下：
+1 2 3 4 5 6 7 8 9 10 11 12  &lt;beginning_of_file&gt; [data block 1] [data block 2] .]]></description>
+</item><item>
+    <title>CAP理论</title>
+    <link>https://iofun.me/posts/cap%E7%90%86%E8%AE%BA/</link>
+    <pubDate>Fri, 09 Jun 2017 23:47:19 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>https://iofun.me/posts/cap%E7%90%86%E8%AE%BA/</guid>
+    <description><![CDATA[介绍 CAP理论指对于一个分布式计算系统来说，不可能同时满足以下三点：
+  一致性（Consistence)
+一致性指的是所有节点总是访问到最新的数据，这里的一致性指的是强一致性，即!Linearizability.
+  可用性（Availability）
+可用性指对于每一个没有宕机的节点，总是可以返回正确的结果。这里的可用性不同于“高可用”（也就是低宕机时间）。
+  分区容错性（Network Partitioning）
+分区容错性指即使发生了网络分区，节点仍然可以响应客户端的请求。
+  CAP理论认为分布式系统最多只能CAP中的两点。
+常见的单机数据库如MYSQL不提供分区容忍，属于AP的系统。
+而对于近年来比较火热的NOSQL，设计时更多考虑水平扩展（Scale out），大多提供分区容忍。因而要在一致性和可用性之间做出选择。
+以Cassandra和HBase为例，Cassandra的P2P模型提供了良好的水平扩展能力， 默认提供最终一致性，选择了CAP中的AP。Cassandra也可以配置成强一致性， 这时就要失去了CAP中的可用性A。
+而HBase则是常见的主从架构，牺牲了可用性，选择了CP。
+CAP理论的不足 CAP理论提出以来，得到了计算机理论界的广泛认可。不过也有不少人指出CAP理论的不足之处。
+DANIEL ABADI 在他的博文 Problems with CAP, and Yahoo’s little known NoSQL system指出了三点CAP的不足。
+  CP系统表面的定义是支持一致性和分区容错性，没有可用性。但是一直不可用的系统是无用的。应该的定义是只有在发生网络分区时，才牺牲可用性。
+  CA 和 CP是相同的。发生网络分区时，才会有可用性的问题，这个系统是CP的。没有网络分区时，则是可用的（CA）。本质上是同一个系统的两种情况。
+  CAP理论无法描述分布式系统中的另外一个重要属性：延迟（latency)。
+  因此他建议使用 PACELC 来替换 CAP： 如果发生了网络分区（P），可用性（A）和一致性（C）如何选择，或者（E）在正常情况，延迟（L）和一致性（C）如何取舍。
+Dynamo在发生网络分区时，牺牲了一致性（C），选择了可用性（A）。正常情况下，为了降低延迟（L），放弃了强一致性（C）。所以Dynamo是PA/EL。
+MYSQL则始终提供强一致性（C），在某些情况下选择性的放弃了可用性（A）和低延迟（L）。所以MYSQL是PC/EC.
+参考  CAP_theorem Wiki Problems with CAP, and Yahoo’s little known NoSQL system Please stop calling databases CP or AP  ]]></description>
+</item><item>
+    <title>Gossip Protocal</title>
+    <link>https://iofun.me/posts/gossip-protocal/</link>
+    <pubDate>Wed, 26 Apr 2017 21:23:51 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>https://iofun.me/posts/gossip-protocal/</guid>
+    <description><![CDATA[什么是Gossip协议 Gossip Protocol利用一种随机的方式将信息散播到整个网络中。正如Gossip本身的含义一样，Gossip协议的工作流程即类似于绯闻的传播，或者流行病的传播。
+Epidemiology 流行病传染最基本的模型仅作如下几个假设：
+ (n+1)个人均匀的分布在一起 每一对人群之间的传染概率是$\beta$，显然$0&lt;\beta&lt;1$. 任意时刻，某个人要么处于infected的状态要么处于uninfected的状态. 一旦某个人从uninfected状态转变成为infected状态，其一直停留在infected状态。  有了以上假设，我们可以进一步分析流行病的传染情况。我们记t时刻处于infected状态的人数为$y_t$，处于uninfected状态的人为$x_t$，那么初始状态 $y_0=1$, $x_0=n$，并且在任何时候$x_t+y_t=n+1$.
+考虑连续的时间，可知：
+ $\frac{dx}{dt}=−βxy$
+ 解为：
+ $x=\frac{n(n+1)}{n+e^{β(n+1)t}}$ $y=\frac{n+1}{1+ne^{−β(n+1)t}}$
+ 明显，当$t→∞$时，$x→0,y→(n+1)x→0,y→(n+1)$，即经过足够的时间，所有的人都将被传染。
+如果每个人每次传染的人数是b,那么
+ $\beta=\frac{b}{n}$
+ 令 t=$clog(n)$,可以得到 $y\approx(n+1)-\frac{1}{n^{cb-2}}$
+这表明，仅需要$O(log(n))$个回合，gossip协议即可将信息传递到所有的节点。 根据分析可得，Gossip协议具有以下的特点:
+ 低延迟。仅仅需要$O(log(n))$个回合的传递时间。 非常可靠。仅有$\frac{1}{n^{cb-2}}$个节点不会收到信息。 轻量级。每个节点传送了$cblog(n)$次信息。  于此同时，Gossip协议的容错性比较高，例如，50的丢包率等价于使用b/2b带代替b进行分析；50的节点错误等价于使用n/2来代替nn，同时使用b/2来代替b进行分析，其分析结果不用带来数量级上的变化。
+Gossip节点的通信方式 根据原论文，两个节点（A、B）之间存在三种通信方式:
+ push: A节点将数据(key,value,version)及对应的版本号推送给B节点，B节点更新A中比自己新的数据 pull：A仅将数据key,version推送给B，B将本地比A新的数据（Key,value,version）推送给A，A更新本地 push/pull：与pull类似，只是多了一步，A再将本地比B新的数据推送给B，B更新本地  如果把两个节点数据同步一次定义为一个周期，则在一个周期内，push需通信1次，pull需2次，push/pull则需3次，从效果上来讲，push/pull最好，理论上一个周期内可以使两个节点完全一致。直观上也感觉，push/pull的收敛速度是最快的。
+假设每个节点通信周期都能选择（感染）一个新节点，则Gossip算法退化为一个二分查找过程，每个周期构成一个平衡二叉树，收敛速度为$O(n^2)$，对应的时间开销则为$O(log(n))$。这也是Gossip理论上最优的收敛速度。但在实际情况中最优收敛速度是很难达到的，假设某个节点在第$i$个周期被感染的概率为$P_i$ ,第$i+1$个周期被感染的概率为$P^{i+1}$ ，则pull的方式:
+ $P_{i+1}=P_i^{b+1}$
+ 而push为：
+ $P_{i+1}=P_i(1-\frac{1}{n})^{n(1-P_i)}$
+ 显然pull的收敛速度大于push，而每个节点在每个周期被感染的概率都是固定的p(0&lt;p&lt;1)，因此Gossip算法是基于p的平方收敛，也成为概率收敛，这在众多的一致性算法中是非常独特的。]]></description>
+</item><item>
+    <title>pipe and fork</title>
+    <link>https://iofun.me/posts/fork-and-pipe/</link>
+    <pubDate>Mon, 19 Sep 2016 22:51:09 &#43;0000</pubDate>
+    <author>Author</author>
+    <guid>https://iofun.me/posts/fork-and-pipe/</guid>
+    <description><![CDATA[Pipe Introduction Every program we run on the command line automatically has three data streams connected to it.
+STDIN (0) - Standard input (data fed into the program) STDOUT (1) - Standard output (data printed by the program, defaults to the terminal) STDERR (2) - Standard error (for error messages, also defaults to the terminal)
+Create a simple pipe in C To create a simple pipe with C, we make use of the pipe() system call.]]></description>
+</item></channel>
+</rss>

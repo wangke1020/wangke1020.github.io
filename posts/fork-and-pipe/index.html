@@ -162,105 +162,105 @@ EMFILE (system file table is full) <br>
 EFAULT (fd array is not valid)</p>
 <p>NOTES: fd[0] is set up for reading, fd[1] is set up for writing</p>
 <p>code example:</p>
-<div class=highlight><div class=chroma>
-<table class=lntable><tr><td class=lntd>
-<pre tabindex=0 class=chroma><code><span class=lnt> 1
-</span><span class=lnt> 2
-</span><span class=lnt> 3
-</span><span class=lnt> 4
-</span><span class=lnt> 5
-</span><span class=lnt> 6
-</span><span class=lnt> 7
-</span><span class=lnt> 8
-</span><span class=lnt> 9
-</span><span class=lnt>10
-</span><span class=lnt>11
-</span><span class=lnt>12
-</span><span class=lnt>13
+<div class=highlight><div style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4>
+<table style=border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block><tr><td style=vertical-align:top;padding:0;margin:0;border:0>
+<pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 1
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 2
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 3
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 4
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 5
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 6
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 7
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 8
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 9
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">10
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">11
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">12
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">13
 </span></code></pre></td>
-<td class=lntd>
-<pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
-</span><span class=cp>#include</span> <span class=cpf>&lt;unistd.h&gt;</span><span class=cp>
-</span><span class=cp>#include</span> <span class=cpf>&lt;sys/types.h&gt;</span><span class=cp>
-</span><span class=cp></span>
-<span class=n>main</span><span class=p>()</span>
-<span class=p>{</span>
-    <span class=kt>int</span>     <span class=n>fd</span><span class=p>[</span><span class=mi>2</span><span class=p>];</span>
-    <span class=n>pid_t</span>   <span class=n>childpid</span><span class=p>;</span>
+<td style=vertical-align:top;padding:0;margin:0;border:0;width:100%>
+<pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#007020>#include</span> <span style=color:#007020>&lt;stdio.h&gt;</span><span style=color:#007020>
+</span><span style=color:#007020>#include</span> <span style=color:#007020>&lt;unistd.h&gt;</span><span style=color:#007020>
+</span><span style=color:#007020>#include</span> <span style=color:#007020>&lt;sys/types.h&gt;</span><span style=color:#007020>
+</span><span style=color:#007020></span>
+main()
+{
+    <span style=color:#902000>int</span>     fd[<span style=color:#40a070>2</span>];
+    pid_t   childpid;
 
-    <span class=n>pipe</span><span class=p>(</span><span class=n>fd</span><span class=p>);</span>
-    <span class=p>.</span>
-    <span class=p>.</span>
-<span class=p>}</span>
+    pipe(fd);
+    .
+    .
+}
 </code></pre></td></tr></table>
 </div>
 </div><p>After pipe is invoked, fd[0] and fd[1] are connected as following picture.</p>
 <p><img src=/img/pipe_and_fork/pipe.png alt=pipe></p>
 <h3 id=use-fork-and-pipe>Use fork and pipe</h3>
-<div class=highlight><div class=chroma>
-<table class=lntable><tr><td class=lntd>
-<pre tabindex=0 class=chroma><code><span class=lnt> 1
-</span><span class=lnt> 2
-</span><span class=lnt> 3
-</span><span class=lnt> 4
-</span><span class=lnt> 5
-</span><span class=lnt> 6
-</span><span class=lnt> 7
-</span><span class=lnt> 8
-</span><span class=lnt> 9
-</span><span class=lnt>10
-</span><span class=lnt>11
-</span><span class=lnt>12
-</span><span class=lnt>13
-</span><span class=lnt>14
-</span><span class=lnt>15
-</span><span class=lnt>16
-</span><span class=lnt>17
-</span><span class=lnt>18
-</span><span class=lnt>19
-</span><span class=lnt>20
-</span><span class=lnt>21
-</span><span class=lnt>22
-</span><span class=lnt>23
-</span><span class=lnt>24
-</span><span class=lnt>25
-</span><span class=lnt>26
-</span><span class=lnt>27
-</span><span class=lnt>28
-</span><span class=lnt>29
-</span><span class=lnt>30
+<div class=highlight><div style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4>
+<table style=border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block><tr><td style=vertical-align:top;padding:0;margin:0;border:0>
+<pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 1
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 2
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 3
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 4
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 5
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 6
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 7
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 8
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 9
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">10
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">11
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">12
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">13
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">14
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">15
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">16
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">17
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">18
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">19
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">20
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">21
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">22
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">23
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">24
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">25
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">26
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">27
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">28
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">29
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">30
 </span></code></pre></td>
-<td class=lntd>
-<pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
-</span><span class=cp>#include</span> <span class=cpf>&lt;unistd.h&gt;</span><span class=cp>
-</span><span class=cp>#include</span> <span class=cpf>&lt;sys/types.h&gt;</span><span class=cp>
-</span><span class=cp></span>
-<span class=n>main</span><span class=p>()</span>
-<span class=p>{</span>
-        <span class=kt>int</span>     <span class=n>fd</span><span class=p>[</span><span class=mi>2</span><span class=p>];</span>
-        <span class=n>pid_t</span>   <span class=n>childpid</span><span class=p>;</span>
+<td style=vertical-align:top;padding:0;margin:0;border:0;width:100%>
+<pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#007020>#include</span> <span style=color:#007020>&lt;stdio.h&gt;</span><span style=color:#007020>
+</span><span style=color:#007020>#include</span> <span style=color:#007020>&lt;unistd.h&gt;</span><span style=color:#007020>
+</span><span style=color:#007020>#include</span> <span style=color:#007020>&lt;sys/types.h&gt;</span><span style=color:#007020>
+</span><span style=color:#007020></span>
+main()
+{
+        <span style=color:#902000>int</span>     fd[<span style=color:#40a070>2</span>];
+        pid_t   childpid;
 
-        <span class=n>pipe</span><span class=p>(</span><span class=n>fd</span><span class=p>);</span>
+        pipe(fd);
 
-        <span class=k>if</span><span class=p>((</span><span class=n>childpid</span> <span class=o>=</span> <span class=n>fork</span><span class=p>())</span> <span class=o>==</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span>
-        <span class=p>{</span>
-                <span class=n>perror</span><span class=p>(</span><span class=s>&#34;fork&#34;</span><span class=p>);</span>
-                <span class=n>exit</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span>
-        <span class=p>}</span>
+        <span style=color:#007020;font-weight:700>if</span>((childpid <span style=color:#666>=</span> fork()) <span style=color:#666>==</span> <span style=color:#666>-</span><span style=color:#40a070>1</span>)
+        {
+                perror(<span style=color:#4070a0>&#34;fork&#34;</span>);
+                exit(<span style=color:#40a070>1</span>);
+        }
 
-        <span class=k>if</span><span class=p>(</span><span class=n>childpid</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span>
-        <span class=p>{</span>
-                <span class=cm>/* Child process closes up input side of pipe */</span>
-                <span class=n>close</span><span class=p>(</span><span class=n>fd</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
-        <span class=p>}</span>
-        <span class=k>else</span>
-        <span class=p>{</span>
-                <span class=cm>/* Parent process closes up output side of pipe */</span>
-                <span class=n>close</span><span class=p>(</span><span class=n>fd</span><span class=p>[</span><span class=mi>1</span><span class=p>]);</span>
-        <span class=p>}</span>
-        <span class=p>.</span>
-        <span class=p>.</span>
-<span class=p>}</span>
+        <span style=color:#007020;font-weight:700>if</span>(childpid <span style=color:#666>==</span> <span style=color:#40a070>0</span>)
+        {
+                <span style=color:#60a0b0;font-style:italic>/* Child process closes up input side of pipe */</span>
+                close(fd[<span style=color:#40a070>0</span>]);
+        }
+        <span style=color:#007020;font-weight:700>else</span>
+        {
+                <span style=color:#60a0b0;font-style:italic>/* Parent process closes up output side of pipe */</span>
+                close(fd[<span style=color:#40a070>1</span>]);
+        }
+        .
+        .
+}
 </code></pre></td></tr></table>
 </div>
 </div><p>After fork is called, child process is created and it also have the two file descriptors.</p>
@@ -268,104 +268,104 @@ EFAULT (fd array is not valid)</p>
 <p>If the parent wants to receive data from the child, it should close fd1, and the child should close fd0. If the parent wants to send data to the child, it should close fd0, and the child should close fd1. Since descriptors are shared between the parent and child, we should always be sure to close the end of pipe we aren&rsquo;t concerned with. On a technical note, the EOF will never be returned if the unnecessary ends of the pipe are not explicitly closed.</p>
 <p><img src=/img/pipe_and_fork/after_close_unused_ends.png alt=pipe_and_fork></p>
 <p>Once the pipeline has been established, the file descriptors may be treated like descriptors to normal files.</p>
-<div class=highlight><div class=chroma>
-<table class=lntable><tr><td class=lntd>
-<pre tabindex=0 class=chroma><code><span class=lnt> 1
-</span><span class=lnt> 2
-</span><span class=lnt> 3
-</span><span class=lnt> 4
-</span><span class=lnt> 5
-</span><span class=lnt> 6
-</span><span class=lnt> 7
-</span><span class=lnt> 8
-</span><span class=lnt> 9
-</span><span class=lnt>10
-</span><span class=lnt>11
-</span><span class=lnt>12
-</span><span class=lnt>13
-</span><span class=lnt>14
-</span><span class=lnt>15
-</span><span class=lnt>16
-</span><span class=lnt>17
-</span><span class=lnt>18
-</span><span class=lnt>19
-</span><span class=lnt>20
-</span><span class=lnt>21
-</span><span class=lnt>22
-</span><span class=lnt>23
-</span><span class=lnt>24
-</span><span class=lnt>25
-</span><span class=lnt>26
-</span><span class=lnt>27
-</span><span class=lnt>28
-</span><span class=lnt>29
-</span><span class=lnt>30
-</span><span class=lnt>31
-</span><span class=lnt>32
-</span><span class=lnt>33
-</span><span class=lnt>34
-</span><span class=lnt>35
-</span><span class=lnt>36
-</span><span class=lnt>37
-</span><span class=lnt>38
-</span><span class=lnt>39
-</span><span class=lnt>40
-</span><span class=lnt>41
-</span><span class=lnt>42
-</span><span class=lnt>43
-</span><span class=lnt>44
-</span><span class=lnt>45
-</span><span class=lnt>46
-</span><span class=lnt>47
+<div class=highlight><div style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4>
+<table style=border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block><tr><td style=vertical-align:top;padding:0;margin:0;border:0>
+<pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 1
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 2
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 3
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 4
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 5
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 6
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 7
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 8
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f"> 9
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">10
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">11
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">12
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">13
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">14
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">15
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">16
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">17
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">18
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">19
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">20
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">21
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">22
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">23
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">24
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">25
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">26
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">27
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">28
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">29
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">30
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">31
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">32
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">33
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">34
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">35
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">36
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">37
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">38
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">39
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">40
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">41
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">42
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">43
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">44
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">45
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">46
+</span><span style="margin-right:.4em;padding:0 .4em;color:#7f7f7f">47
 </span></code></pre></td>
-<td class=lntd>
-<pre tabindex=0 class=chroma><code class=language-cpp data-lang=cpp><span class=cm>/*****************************************************************************
-</span><span class=cm> Excerpt from &#34;Linux Programmer&#39;s Guide - Chapter 6&#34;
-</span><span class=cm> (C)opyright 1994-1995, Scott Burkett
-</span><span class=cm> *****************************************************************************
-</span><span class=cm> MODULE: pipe.c
-</span><span class=cm> *****************************************************************************/</span>
+<td style=vertical-align:top;padding:0;margin:0;border:0;width:100%>
+<pre tabindex=0 style=background-color:#f0f0f0;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-cpp data-lang=cpp><span style=color:#60a0b0;font-style:italic>/*****************************************************************************
+</span><span style=color:#60a0b0;font-style:italic> Excerpt from &#34;Linux Programmer&#39;s Guide - Chapter 6&#34;
+</span><span style=color:#60a0b0;font-style:italic> (C)opyright 1994-1995, Scott Burkett
+</span><span style=color:#60a0b0;font-style:italic> *****************************************************************************
+</span><span style=color:#60a0b0;font-style:italic> MODULE: pipe.c
+</span><span style=color:#60a0b0;font-style:italic> *****************************************************************************/</span>
 
-<span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
-</span><span class=cp>#include</span> <span class=cpf>&lt;unistd.h&gt;</span><span class=cp>
-</span><span class=cp>#include</span> <span class=cpf>&lt;sys/types.h&gt;</span><span class=cp>
-</span><span class=cp></span>
-<span class=kt>int</span> <span class=nf>main</span><span class=p>(</span><span class=kt>void</span><span class=p>)</span>
-<span class=p>{</span>
-        <span class=kt>int</span>     <span class=n>fd</span><span class=p>[</span><span class=mi>2</span><span class=p>],</span> <span class=n>nbytes</span><span class=p>;</span>
-        <span class=n>pid_t</span>   <span class=n>childpid</span><span class=p>;</span>
-        <span class=kt>char</span>    <span class=n>string</span><span class=p>[]</span> <span class=o>=</span> <span class=s>&#34;Hello, world!</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>;</span>
-        <span class=kt>char</span>    <span class=n>readbuffer</span><span class=p>[</span><span class=mi>80</span><span class=p>];</span>
+<span style=color:#007020>#include</span> <span style=color:#007020>&lt;stdio.h&gt;</span><span style=color:#007020>
+</span><span style=color:#007020>#include</span> <span style=color:#007020>&lt;unistd.h&gt;</span><span style=color:#007020>
+</span><span style=color:#007020>#include</span> <span style=color:#007020>&lt;sys/types.h&gt;</span><span style=color:#007020>
+</span><span style=color:#007020></span>
+<span style=color:#902000>int</span> <span style=color:#06287e>main</span>(<span style=color:#902000>void</span>)
+{
+        <span style=color:#902000>int</span>     fd[<span style=color:#40a070>2</span>], nbytes;
+        pid_t   childpid;
+        <span style=color:#902000>char</span>    string[] <span style=color:#666>=</span> <span style=color:#4070a0>&#34;Hello, world!</span><span style=color:#4070a0;font-weight:700>\n</span><span style=color:#4070a0>&#34;</span>;
+        <span style=color:#902000>char</span>    readbuffer[<span style=color:#40a070>80</span>];
 
-        <span class=n>pipe</span><span class=p>(</span><span class=n>fd</span><span class=p>);</span>
+        pipe(fd);
 
-        <span class=k>if</span><span class=p>((</span><span class=n>childpid</span> <span class=o>=</span> <span class=n>fork</span><span class=p>())</span> <span class=o>==</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span>
-        <span class=p>{</span>
-                <span class=n>perror</span><span class=p>(</span><span class=s>&#34;fork&#34;</span><span class=p>);</span>
-                <span class=n>exit</span><span class=p>(</span><span class=mi>1</span><span class=p>);</span>
-        <span class=p>}</span>
+        <span style=color:#007020;font-weight:700>if</span>((childpid <span style=color:#666>=</span> fork()) <span style=color:#666>==</span> <span style=color:#666>-</span><span style=color:#40a070>1</span>)
+        {
+                perror(<span style=color:#4070a0>&#34;fork&#34;</span>);
+                exit(<span style=color:#40a070>1</span>);
+        }
 
-        <span class=k>if</span><span class=p>(</span><span class=n>childpid</span> <span class=o>==</span> <span class=mi>0</span><span class=p>)</span>
-        <span class=p>{</span>
-                <span class=cm>/* Child process closes up input side of pipe */</span>
-                <span class=n>close</span><span class=p>(</span><span class=n>fd</span><span class=p>[</span><span class=mi>0</span><span class=p>]);</span>
+        <span style=color:#007020;font-weight:700>if</span>(childpid <span style=color:#666>==</span> <span style=color:#40a070>0</span>)
+        {
+                <span style=color:#60a0b0;font-style:italic>/* Child process closes up input side of pipe */</span>
+                close(fd[<span style=color:#40a070>0</span>]);
 
-                <span class=cm>/* Send &#34;string&#34; through the output side of pipe */</span>
-                <span class=n>write</span><span class=p>(</span><span class=n>fd</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span> <span class=n>string</span><span class=p>,</span> <span class=p>(</span><span class=n>strlen</span><span class=p>(</span><span class=n>string</span><span class=p>)</span><span class=o>+</span><span class=mi>1</span><span class=p>));</span>
-                <span class=n>exit</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
-        <span class=p>}</span>
-        <span class=k>else</span>
-        <span class=p>{</span>
-                <span class=cm>/* Parent process closes up output side of pipe */</span>
-                <span class=n>close</span><span class=p>(</span><span class=n>fd</span><span class=p>[</span><span class=mi>1</span><span class=p>]);</span>
+                <span style=color:#60a0b0;font-style:italic>/* Send &#34;string&#34; through the output side of pipe */</span>
+                write(fd[<span style=color:#40a070>1</span>], string, (strlen(string)<span style=color:#666>+</span><span style=color:#40a070>1</span>));
+                exit(<span style=color:#40a070>0</span>);
+        }
+        <span style=color:#007020;font-weight:700>else</span>
+        {
+                <span style=color:#60a0b0;font-style:italic>/* Parent process closes up output side of pipe */</span>
+                close(fd[<span style=color:#40a070>1</span>]);
 
-                <span class=cm>/* Read in a string from the pipe */</span>
-                <span class=n>nbytes</span> <span class=o>=</span> <span class=n>read</span><span class=p>(</span><span class=n>fd</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=n>readbuffer</span><span class=p>,</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>readbuffer</span><span class=p>));</span>
-                <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Received string: %s&#34;</span><span class=p>,</span> <span class=n>readbuffer</span><span class=p>);</span>
-        <span class=p>}</span>
+                <span style=color:#60a0b0;font-style:italic>/* Read in a string from the pipe */</span>
+                nbytes <span style=color:#666>=</span> read(fd[<span style=color:#40a070>0</span>], readbuffer, <span style=color:#007020;font-weight:700>sizeof</span>(readbuffer));
+                printf(<span style=color:#4070a0>&#34;Received string: %s&#34;</span>, readbuffer);
+        }
 
-        <span class=k>return</span><span class=p>(</span><span class=mi>0</span><span class=p>);</span>
-<span class=p>}</span>
+        <span style=color:#007020;font-weight:700>return</span>(<span style=color:#40a070>0</span>);
+}
 </code></pre></td></tr></table>
 </div>
 </div><h3 id=reference>Reference:</h3>

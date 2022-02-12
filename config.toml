@@ -1,0 +1,39 @@
+baseURL = 'https://iofun.me/'
+languageCode = 'en-us'
+title = 'iofun'
+theme = "cactus"
+
+[[menu.main]]
+name = "Home"
+url = "/"
+weight = 1
+
+[[menu.main]]
+name = "All posts"
+url = "/posts"
+weight = 2
+
+
+[params]
+  colortheme = "classic" # dark, light, white, or classic
+  mathjax = true  # not required
+  showAllPostsArchive = true
+  [[params.social]]
+    name = "github"
+    link = "https://github.com/wangke1020"
+
+  [[params.social]]
+    name = "email"
+    link = "wangke1020@gmail.com" # no need for "mailto:" at the start
+
+[markup]
+  [markup.highlight]
+    codeFences = true
+    guessSyntax = true
+    hl_Lines = ""
+    lineNoStart = 1
+    lineNos = true
+    lineNumbersInTable = true
+    noClasses = true
+    style = "dracula"
+    tabWidth = 4

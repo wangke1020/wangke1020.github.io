@@ -13,9 +13,13 @@ name = "All posts"
 url = "/posts"
 weight = 2
 
+[[menu.main]]
+name = "Tags"
+url = "/tags"
+weight = 3
+
 
 [params]
-  version = "0.2.X"
   colortheme = "classic" # dark, light, white, or classic
   mathjax = true  # not required
   showAllPostsArchive = true

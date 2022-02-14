@@ -1,7 +1,7 @@
 ---
 title: CAP理论
 date: 2017-06-09 23:47:19
-tags:
+tags: [distributed systems]
 ---
 ### 介绍
 CAP理论指对于一个分布式计算系统来说，不可能同时满足以下三点：

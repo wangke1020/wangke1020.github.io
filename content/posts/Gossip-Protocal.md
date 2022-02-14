@@ -1,7 +1,7 @@
 ---
 title: Gossip Protocal
 date: 2017-04-26 21:23:51
-
+tags: [distributed systems]
 ---
 #### 什么是Gossip协议
 Gossip Protocol利用一种随机的方式将信息散播到整个网络中。正如Gossip本身的含义一样，Gossip协议的工作流程即类似于绯闻的传播，或者流行病的传播。

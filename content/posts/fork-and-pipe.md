@@ -1,7 +1,7 @@
 ---
 title: pipe and fork
 date: 2016-09-19 22:51:09
-
+tags: linux
 ---
 
 ## Pipe Introduction

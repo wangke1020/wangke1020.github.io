@@ -2,3 +2,6 @@
 	path = themes/cactus
 	url = https://github.com/rickyhewitt/hugo-theme-cactus.git
 	branch = rickyhewitt-patch-1
+[submodule "themes/loveit"]
+	path = themes/loveit
+	url = https://github.com/dillonzq/LoveIt.git
